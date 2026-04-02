@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artemis Logistics Mission — Marketing Supply Chain Game</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f4f0;
+    --bg-info: #e6f1fb;
+    --text-primary: #1a1a18;
+    --text-secondary: #73726c;
+    --text-info: #185FA5;
+    --border: rgba(0,0,0,0.15);
+    --border-md: rgba(0,0,0,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --green: #1D9E75;
+    --blue: #378ADD;
+    --amber: #BA7517;
+    --red: #A32D2D;
+    --purple: #7F77DD;
+    --orange: #D85A30;
+    --teal: #5DCAA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1e1e1c;
+      --bg-secondary: #2a2a27;
+      --bg-info: #0c2a44;
+      --text-primary: #e8e6df;
+      --text-secondary: #9c9a92;
+      --text-info: #85B7EB;
+      --border: rgba(255,255,255,0.12);
+      --border-md: rgba(255,255,255,0.22);
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg-secondary); color: var(--text-primary); min-height: 100vh; }
+  header { background: var(--bg-primary); border-bottom: 0.5px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+  header p { font-size: 11px; color: var(--text-secondary); }
+  .badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--bg-info); color: var(--text-info); }
+  #app { display: grid; grid-template-columns: 1fr 360px; gap: 0; min-height: calc(100vh - 53px); }
+  @media (max-width: 820px) { #app { grid-template-columns: 1fr; } }
+  #viz { border-right: 0.5px solid var(--border); padding: 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 8px; }
+  #dash { padding: 10px; display: flex; flex-direction: column; gap: 7px; background: var(--bg-secondary); overflow-y: auto; }
+  canvas { width: 100%; display: block; }
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .stat { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 7px 9px; }
+  .stat-lbl { font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; }
+  .stat-val { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .stat-val.warn { color: var(--amber); }
+  .stat-val.ok { color: var(--green); }
+  .stat-val.danger { color: var(--red); }
+  .panel { background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 9px 11px; }
+  .panel-title { font-size: 10px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .concept-card { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 8px 10px; }
+  .concept-title { font-size: 11px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+  .concept-body { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+  .controls { display: flex; flex-direction: column; gap: 5px; }
+  .ctrl-row { display: flex; align-items: center; gap: 6px; }
+  .ctrl-lbl { width: 68px; color: var(--text-secondary); font-size: 10px; flex-shrink: 0; }
+  .ctrl-row input[type=range] { flex: 1; accent-color: var(--blue); }
+  .ctrl-val { width: 32px; text-align: right; font-size: 10px; font-weight: 500; color: var(--text-primary); }
+  button { background: transparent; border: 0.5px solid var(--border-md); border-radius: var(--radius-md); padding: 6px 12px; font-size: 11px; cursor: pointer; color: var(--text-primary); transition: background .15s; font-family: inherit; }
+  button:hover { background: var(--bg-secondary); }
+  button.primary { background: #185FA5; color: #E6F1FB; border-color: #185FA5; }
+  button.primary:hover { background: #0C447C; }
+  button.isru-btn { background: #0F6E56; color: #E1F5EE; border-color: #0F6E56; }
+  button.isru-btn:hover { background: #085041; }
+  button:disabled { opacity: 0.35; cursor: default; }
+  .fuel-bar-wrap { height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; margin-top: 3px; }
+  .fuel-bar-fill { height: 100%; border-radius: 4px; transition: width .5s; background: var(--green); }
+  .overlay-alert { position: absolute; top: 8px; right: 8px; font-size: 10px; padding: 4px 8px; border-radius: 4px; pointer-events: none; transition: opacity .3s; opacity: 0; z-index: 10; font-family: inherit; }
+  .overlay-alert.show { opacity: 1; }
+  .overlay-alert.danger { background: #FCEBEB; color: #501313; }
+  .overlay-alert.warn { background: #FAEEDA; color: #412402; }
+  .overlay-alert.success { background: #EAF3DE; color: #173404; }
+  .phase-item { display: flex; align-items: center; gap: 5px; font-size: 10px; padding: 2px 4px; border-radius: 3px; transition: background .2s; }
+  .phase-item.active { background: var(--bg-info); }
+  .phase-item.done { opacity: 0.38; }
+  .risk-feed { display: flex; flex-direction: column; gap: 3px; max-height: 78px; overflow-y: auto; }
+  .risk-event { border-radius: 4px; padding: 3px 7px; font-size: 10px; line-height: 1.4; border-left: 2px solid transparent; }
+  .risk-event.danger { background: #FCEBEB; border-color: #A32D2D; color: #501313; }
+  .risk-event.warn { background: #FAEEDA; border-color: #854F0B; color: #412402; }
+  .risk-event.info { background: #E6F1FB; border-color: #185FA5; color: #042C53; }
+  .risk-event.success { background: #EAF3DE; border-color: #3B6D11; color: #173404; }
+  #bid-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 50; align-items: center; justify-content: center; }
+  #bid-modal.show { display: flex; }
+  #bid-box { background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 18px; width: 94%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+  .bid-header { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
+  .bid-sub { font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; }
+  .partner-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  @media (max-width: 520px) { .partner-cards { grid-template-columns: 1fr; } }
+  .partner-card { border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 11px; cursor: pointer; transition: border-color .15s, background .15s; position: relative; margin-top: 10px; }
+  .partner-card:hover { background: var(--bg-secondary); }
+  .partner-card.selected { border: 2px solid #185FA5; background: var(--bg-info); }
+  .partner-card.cheapest::before { content: "Lowest cost"; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-size: 9px; background: #EAF3DE; color: #3B6D11; padding: 1px 7px; border-radius: 3px; white-space: nowrap; }
+  .partner-card.reliable::before { content: "Most reliable"; position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-size: 9px; background: #E6F1FB; color: #185FA5; padding: 1px 7px; border-radius: 3px; white-space: nowrap; }
+  .partner-logo { font-size: 20px; margin-bottom: 4px; }
+  .partner-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 7px; }
+  .partner-stat { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary); margin-bottom: 2px; }
+  .partner-stat span:last-child { font-weight: 500; color: var(--text-primary); }
+  .rel-bar { height: 4px; background: var(--bg-secondary); border-radius: 2px; margin-top: 3px; overflow: hidden; }
+  .rel-fill { height: 100%; border-radius: 2px; }
+  .bid-concept { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 9px 11px; margin-bottom: 12px; font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+  .bid-concept strong { color: var(--text-primary); font-weight: 500; }
+  .bid-actions { display: flex; justify-content: flex-end; gap: 7px; }
+  .partner-history { display: flex; gap: 4px; flex-wrap: wrap; }
+  .ph-chip { font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 500; }
+  .chart-legend { display: flex; justify-content: center; gap: 14px; font-size: 9px; color: var(--text-secondary); }
+  .legend-dot { display: inline-block; width: 8px; height: 3px; border-radius: 1px; vertical-align: middle; margin-right: 3px; }
+  .section-note { font-size: 10px; color: var(--text-secondary); padding: 4px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Artemis Logistics Mission</h1>
+    <p>A marketing supply chain simulation — partner selection, risk management &amp; vertical integration</p>
+  </div>
+  <span class="badge">Educational Game</span>
+</header>
+
+<div id="app">
+  <div id="viz">
+    <div style="position:relative">
+      <canvas id="traj" height="300"></canvas>
+      <div id="overlay-alert" class="overlay-alert"></div>
+    </div>
+    <div id="phase-label" style="font-size:10px;font-weight:500;color:var(--text-secondary);text-align:center;height:14px"></div>
+    <div style="position:relative;height:120px"><canvas id="cost-chart" height="120"></canvas></div>
+    <div class="chart-legend">
+      <span><span class="legend-dot" style="background:#378ADD"></span>Mission cost</span>
+      <span><span class="legend-dot" style="background:#1D9E75"></span>Moon fuel saving</span>
+      <span><span class="legend-dot" style="background:#D85A30"></span>Delay cost</span>
+    </div>
+  </div>
+
+  <div id="dash">
+    <div class="stat-row">
+      <div class="stat"><div class="stat-lbl">Mission</div><div class="stat-val" id="s-mission">—</div></div>
+      <div class="stat"><div class="stat-lbl">Total spent</div><div class="stat-val warn" id="s-spent">$0M</div></div>
+      <div class="stat"><div class="stat-lbl">Total delays</div><div class="stat-val danger" id="s-delays">0d</div></div>
+      <div class="stat"><div class="stat-lbl">Score</div><div class="stat-val ok" id="s-score">100</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Current partner</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="cur-logo" style="font-size:22px">—</div>
+        <div>
+          <div id="cur-name" style="font-size:12px;font-weight:500;color:var(--text-primary)">None selected</div>
+          <div id="cur-stats" style="font-size:10px;color:var(--text-secondary)">Select a mission to begin</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div style="font-size:10px;color:var(--text-secondary)">Used</div>
+          <div id="cur-uses" style="font-size:14px;font-weight:500;color:var(--text-primary)">0×</div>
+        </div>
+      </div>
+      <div style="margin-top:6px">
+        <div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px">Partner history</div>
+        <div class="partner-history" id="partner-history"><span style="font-size:10px;color:var(--text-secondary)">No missions yet</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Mission config</div>
+      <div class="controls">
+        <div class="ctrl-row"><span class="ctrl-lbl">Cargo (t)</span><input type="range" id="c-cargo" min="5" max="27" value="14" step="1" oninput="update()"><span class="ctrl-val" id="v-cargo">14</span></div>
+        <div class="ctrl-row"><span class="ctrl-lbl">Crew</span><input type="range" id="c-crew" min="0" max="4" value="4" step="1" oninput="update()"><span class="ctrl-val" id="v-crew">4</span></div>
+        <div class="ctrl-row"><span class="ctrl-lbl">Risk level</span><input type="range" id="c-risk" min="1" max="3" value="2" step="1" oninput="update()"><span class="ctrl-val" id="v-risk">Med</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="primary" id="btn-supply" onclick="openBid('supply')">New supply mission</button>
+      <button class="isru-btn" id="btn-isru" onclick="openBid('isru')" disabled>ISRU mission <span id="isru-lock" style="font-size:9px;padding:1px 5px;border-radius:3px;background:#FAEEDA;color:#854F0B;margin-left:3px">locked</span></button>
+    </div>
+    <div class="section-note" id="isru-hint">Run 3 supply missions to unlock ISRU ice-mining deployment</div>
+
+    <div class="panel">
+      <div class="panel-title">Lunar fuel stockpile</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <span style="font-size:10px;color:var(--text-secondary)">LH2/LOX reserve</span>
+        <span style="font-size:11px;font-weight:500;color:var(--green)" id="fuel-pct">0t</span>
+      </div>
+      <div class="fuel-bar-wrap"><div class="fuel-bar-fill" id="fuel-bar" style="width:0%"></div></div>
+      <div class="section-note" id="fuel-savings">ISRU not yet deployed</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Logistics concept</div>
+      <div class="concept-card">
+        <div class="concept-title" id="c-title">Partner selection strategy</div>
+        <div class="concept-body" id="c-body">Choose a launch provider above. Each mission is a new sourcing decision — spot buying gives flexibility, but relationship value builds with repeated partners.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Risk event log</div>
+      <div class="risk-feed" id="risk-feed"><div style="font-size:10px;color:var(--text-secondary)">No events yet.</div></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Mission phases</div>
+      <div id="phase-list" style="display:flex;flex-direction:column;gap:2px"></div>
+    </div>
+
+    <div class="panel" style="background:var(--bg-secondary);border-color:transparent">
+      <div class="panel-title">About this game</div>
+      <div style="font-size:10px;color:var(--text-secondary);line-height:1.6">
+        Built for marketing logistics education. Covers: vendor selection, spot vs. preferred supplier strategy, reliability vs. cost tradeoffs, vertical integration (ISRU), risk management, and supply chain visibility.<br><br>
+        Based on real NASA Artemis II mission trajectory and partner profiles (SpaceX, Boeing, Blue Origin).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bid Modal -->
+<div id="bid-modal">
+  <div id="bid-box">
+    <div class="bid-header">Select launch partner</div>
+    <div class="bid-sub" id="bid-sub">Review bids and select your launch provider.</div>
+    <div class="partner-cards" id="partner-cards"></div>
+    <div class="bid-concept" id="bid-concept"></div>
+    <div class="bid-actions">
+      <button id="bid-cancel" onclick="closeBid()">Cancel</button>
+      <button class="primary" id="bid-confirm" onclick="confirmPartner()" disabled>Launch with selected partner</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PARTNERS = {
+  spacex:    { name:"SpaceX",      logo:"🚀", color:"#378ADD", chipBg:"#dbeeff", chipColor:"#0C447C", baseCost:80,  cargoBonus:5, reliabilityBase:0.78, riskMod:1.00, crewRated:true,  flavorRisk:"SpaceX anomaly: Raptor abort triggered. Auto-recovery nominal. +{d}d." },
+  boeing:    { name:"Boeing",      logo:"✈",  color:"#5F5E5A", chipBg:"#eceae3", chipColor:"#2C2C2A", baseCost:145, cargoBonus:0, reliabilityBase:0.93, riskMod:0.55, crewRated:true,  flavorRisk:"Boeing schedule slip: SLS processing delay. +{d}d hold, +${c}M." },
+  blueorigin:{ name:"Blue Origin", logo:"🌐", color:"#1D9E75", chipBg:"#d5f5eb", chipColor:"#085041", baseCost:105, cargoBonus:2, reliabilityBase:0.72, riskMod:1.35, crewRated:false, flavorRisk:"Blue Origin anomaly: New Glenn guidance fault. Correction burn. +{d}d." },
+};
+
+const PHASES = [
+  {id:"park",    name:"Earth parking orbit",  color:"#378ADD", days:[1,2],  spd:0.014, concept:{title:"Inventory staging",       body:"Parking orbit = distribution center hold. Payload staged before main transit begins. Reduces launch-window risk."}},
+  {id:"tli",     name:"Trans-lunar injection",color:"#EF9F27", days:[3,4],  spd:0.013, concept:{title:"Order fulfillment timing", body:"TLI is the pick-and-ship moment. Miss the window and the entire schedule slips — like missing a carrier pickup cutoff."}},
+  {id:"transit", name:"Outbound transit",     color:"#EF9F27", days:[5,9],  spd:0.004, concept:{title:"In-transit visibility",    body:"4-day coast mirrors long-haul ocean freight. Real-time telemetry = supply chain track-and-trace."}},
+  {id:"lo",      name:"Lunar orbit",          color:"#5DCAA5", days:[10,11],spd:0.012, concept:{title:"Last-mile staging",        body:"Lunar orbit = last-mile depot. Crew and cargo repositioned before final delivery to the surface."}},
+  {id:"land",    name:"Lunar landing",        color:"#5DCAA5", days:[12,13],spd:0.011, concept:{title:"Point of delivery",        body:"Landing site = customer address. Precision matters — off-target landings are costly returns."}},
+  {id:"surface", name:"Surface operations",   color:"#D85A30", days:[14,17],spd:0.006, concept:{title:"On-site value creation",   body:"Science, construction, ISRU work. In logistics: dwell time at the customer site where actual value is delivered."}},
+  {id:"ascent",  name:"Lunar ascent",         color:"#D85A30", days:[18,19],spd:0.012, concept:{title:"Reverse logistics",        body:"Getting crew and samples back = reverse logistics. Often overlooked but critical to mission economics."}},
+  {id:"return",  name:"Return transit",       color:"#7F77DD", days:[20,24],spd:0.004, concept:{title:"Return journey cost",      body:"Return burns ~40% of total fuel. In supply chains, returns processing costs mirror this asymmetry."}},
+  {id:"reentry", name:"Re-entry & splashdown",color:"#7F77DD", days:[25,26],spd:0.013, concept:{title:"Delivery confirmation",    body:"Splashdown = signed proof of delivery. Post-mission debrief = after-action review in logistics."}},
+];
+
+const ISRU_PHASES = [
+  {id:"park",    name:"Earth parking orbit",  color:"#378ADD", days:[1,2],  spd:0.014, concept:{title:"ISRU deployment staging",  body:"ISRU hardware is delicate and irreplaceable. Orbit staging allows a final systems check before lunar commitment."}},
+  {id:"tli",     name:"Trans-lunar injection",color:"#EF9F27", days:[3,4],  spd:0.013, concept:{title:"Capital equipment transit", body:"Shipping ISRU = shipping a factory. One-time CapEx with long-term OpEx reduction. Partner reliability critical here."}},
+  {id:"transit", name:"Outbound transit",     color:"#EF9F27", days:[5,9],  spd:0.004, concept:{title:"Supply chain investment",   body:"Every dollar getting ISRU to the Moon is fixed cost. Break-even depends on total mission volume over time."}},
+  {id:"lo",      name:"Lunar orbit",          color:"#5DCAA5", days:[10,11],spd:0.012, concept:{title:"Site selection logistics",  body:"South Pole Shackleton crater: permanently shadowed, confirmed water ice. Location = durable competitive advantage."}},
+  {id:"land",    name:"ISRU deployment",      color:"#1D9E75", days:[12,14],spd:0.008, concept:{title:"Factory installation",      body:"Drill rigs, electrolysis cells, cryo tanks installed. Building a production facility at the customer delivery site."}},
+  {id:"surface", name:"Ice extraction begins",color:"#1D9E75", days:[15,18],spd:0.005, concept:{title:"Make vs Buy: activated",    body:"H₂O ice → electrolysis → LH₂ + LOX. You now manufacture your own propellant. Vertical integration complete."}},
+  {id:"ascent",  name:"Lunar ascent",         color:"#D85A30", days:[19,20],spd:0.012, concept:{title:"First Moon-fueled return",  body:"If stockpile > 20t, ascent uses lunar fuel. Cost per mission just shifted downward. Watch the chart."}},
+  {id:"return",  name:"Return transit",       color:"#7F77DD", days:[21,25],spd:0.004, concept:{title:"Cost curve inflection",     body:"Earth fuel cost stays flat. Moon fuel cost falls with each mission. Break-even approaches around mission 5–6."}},
+  {id:"reentry", name:"Re-entry & splashdown",color:"#7F77DD", days:[26,27],spd:0.013, concept:{title:"Break-even analysis",       body:"Classic vertical integration payoff: high fixed cost amortized over volume. The more missions, the better the math."}},
+];
+
+const SUPPLY_RISKS = [
+  {id:"flare",   phases:["transit","return"], type:"danger", prob:[0,0.006,0.012], delay:2, cost:18, icon:"Solar flare",     msg:"Radiation storm — crew sheltering. +{d}d, +${c}M.",        logistic:"Force majeure: safety stock buffer critical. No buffer = full exposure."},
+  {id:"micro",   phases:["transit","lo"],     type:"warn",   prob:[0,0.005,0.010], delay:1, cost:8,  icon:"Micrometeorite",  msg:"Hull impact — inspection hold. +{d}d, +${c}M.",             logistic:"Quality hold: receiving dock inspection mirrors this delay."},
+  {id:"comms",   phases:["transit"],          type:"warn",   prob:[0,0.004,0.009], delay:1, cost:5,  icon:"Comms blackout",  msg:"Signal lost 18hrs. Autonomous mode. +{d}d.",                logistic:"Visibility gap: shipment goes dark — carrier tracking failure scenario."},
+  {id:"weather", phases:["land"],             type:"warn",   prob:[0,0.007,0.014], delay:2, cost:10, icon:"Dust storm",      msg:"Regolith storm — descent abort, rescheduling. +{d}d.",      logistic:"Last-mile weather closure: rerouting required. Destination access risk."},
+  {id:"fuel",    phases:["tli","ascent"],     type:"danger", prob:[0,0.004,0.008], delay:0, cost:22, icon:"Fuel anomaly",    msg:"Unexpected burn — correction required. +${c}M.",            logistic:"Expedited surcharge: unplanned fuel burn = cost overrun. Margin matters."},
+];
+
+const ISRU_RISKS = [
+  {id:"freeze",   phases:["surface","land"],  type:"danger", prob:[0,0.007,0.014], delay:2, cost:15, icon:"Equipment freeze", msg:"Drill frozen at -230°C. Thermal repair needed. +{d}d, +${c}M.", logistic:"Factory downtime: equipment failure halts production. Preventive maintenance ROI."},
+  {id:"regolith", phases:["surface"],         type:"warn",   prob:[0,0.006,0.012], delay:1, cost:8,  icon:"Regolith jam",    msg:"Abrasive separator jam. +{d}d hold.",                           logistic:"Input quality: raw material variability hits throughput. Upstream supply risk."},
+  {id:"cryo",     phases:["surface"],         type:"warn",   prob:[0,0.005,0.009], delay:0, cost:10, icon:"Cryo leak",       msg:"LH₂ boil-off detected. Stockpile -8t.",                         logistic:"Inventory shrinkage: perishable cold chain spoilage. Same economics."},
+  {id:"power",    phases:["surface"],         type:"danger", prob:[0,0.004,0.008], delay:1, cost:12, icon:"Power fault",     msg:"Solar array hit. Electrolysis paused. +{d}d.",                   logistic:"Utility disruption: power outage stops the production line completely."},
+];
+
+let G = {
+  running:false, missionType:"supply", selectedPartner:null, pendingType:null,
+  phaseIdx:0, phaseFrac:0, trail:[], missionCount:0, supplyCount:0,
+  isruUnlocked:false, isruDeployed:false, fuelStockpile:0,
+  totalDelays:0, totalSpent:0, partnerHistory:[],
+  partnerUses:{spacex:0,boeing:0,blueorigin:0},
+  partnerRelScore:{spacex:0,boeing:0,blueorigin:0},
+  firedEvents:new Set(), alertTimer:null, flashType:null, flashFrames:0,
+  animFrame:null, missionDelays:0, missionCostAdd:0
+};
+
+let costChart = null;
+
+function lerp(a,b,v){return a+(b-a)*v}
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
+function rnd(n){return Math.round(n)}
+
+function getPartnerCost(pid, mtype){
+  const p = PARTNERS[pid];
+  const disc = Math.min(G.partnerRelScore[pid]*2, 18);
+  const premium = mtype==="isru" ? 30 : 0;
+  return rnd(p.baseCost - disc + premium);
+}
+function getPartnerCargo(pid){ return Math.min(27, parseInt(document.getElementById('c-cargo').value) + PARTNERS[pid].cargoBonus); }
+function getPartnerRel(pid){ return clamp(PARTNERS[pid].reliabilityBase + G.partnerRelScore[pid]*0.02, 0, 0.99); }
+function getEffectiveRiskMod(pid){ return PARTNERS[pid].riskMod * Math.max(0, 1 - G.partnerRelScore[pid]*0.06); }
+function moonFuelDiscount(){ return G.isruDeployed ? rnd(clamp(G.fuelStockpile/100,0,1)*0.42*120) : 0; }
+
+function update(){
+  document.getElementById('v-cargo').textContent = document.getElementById('c-cargo').value;
+  document.getElementById('v-crew').textContent = document.getElementById('c-crew').value;
+  document.getElementById('v-risk').textContent = ['Low','Med','High'][parseInt(document.getElementById('c-risk').value)-1];
+}
+
+function buildBidCards(mtype){
+  const crew = parseInt(document.getElementById('c-crew').value);
+  const ids = Object.keys(PARTNERS);
+  const cheapest = ids.reduce((a,b)=>getPartnerCost(a,mtype)<getPartnerCost(b,mtype)?a:b);
+  const reliable = ids.reduce((a,b)=>getPartnerRel(a)>getPartnerRel(b)?a:b);
+  document.getElementById('partner-cards').innerHTML = ids.map(pid=>{
+    const p = PARTNERS[pid];
+    const cost = getPartnerCost(pid,mtype);
+    const cargo = getPartnerCargo(pid);
+    const rel = rnd(getPartnerRel(pid)*100);
+    const rm = rnd(getEffectiveRiskMod(pid)*100);
+    const rs = G.partnerRelScore[pid];
+    const crewOk = crew===0 || p.crewRated;
+    return `<div class="partner-card${pid===cheapest?' cheapest':''}${pid===reliable?' reliable':''}" id="pc-${pid}" onclick="selectPartner('${pid}')">
+      <div class="partner-logo">${p.logo}</div>
+      <div class="partner-name">${p.name}</div>
+      <div class="partner-stat"><span>Cost</span><span>$${cost}M</span></div>
+      <div class="partner-stat"><span>Max cargo</span><span>${cargo}t</span></div>
+      <div class="partner-stat"><span>Reliability</span><span>${rel}%</span></div>
+      <div class="rel-bar"><div class="rel-fill" style="width:${rel}%;background:${p.color}"></div></div>
+      <div class="partner-stat" style="margin-top:4px"><span>Risk modifier</span><span style="color:${rm>100?'#A32D2D':rm<80?'#3B6D11':'#BA7517'}">${rm}%</span></div>
+      <div class="partner-stat"><span>Relationship</span><span style="color:${rs>3?'#3B6D11':'var(--text-secondary)'}">Lv ${rs}</span></div>
+      <div class="partner-stat"><span>Times used</span><span>${G.partnerUses[pid]}×</span></div>
+      ${!crewOk ? `<div style="font-size:9px;color:#A32D2D;margin-top:4px">⚠ Not crew-rated</div>` : ''}
+      ${rs>0 ? `<div style="font-size:9px;color:#3B6D11;margin-top:2px">-$${Math.min(rs*2,18)}M relationship discount</div>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('bid-confirm').disabled = true;
+  G.selectedPartner = null;
+  const concepts = {
+    supply: `<strong>Spot buying vs. preferred supplier:</strong> Choosing a new provider each mission = spot buying (max flexibility, no relationship). Sticking with one = preferred supplier (discounts, priority, trust). Neither dominates — it depends on volume, risk tolerance, and switching costs.`,
+    isru: `<strong>Critical supplier for capital equipment:</strong> ISRU is a one-way, high-stakes shipment. Reliability matters more than cost here — a failed ISRU delivery requires a full resupply mission. This is single-source procurement for mission-critical hardware.`
+  };
+  document.getElementById('bid-concept').innerHTML = concepts[mtype] || concepts.supply;
+}
+
+function selectPartner(pid){
+  const crew = parseInt(document.getElementById('c-crew').value);
+  if(crew>0 && !PARTNERS[pid].crewRated) return;
+  document.querySelectorAll('.partner-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('pc-'+pid).classList.add('selected');
+  G.selectedPartner = pid;
+  document.getElementById('bid-confirm').disabled = false;
+}
+
+function openBid(mtype){
+  if(G.running) return;
+  G.pendingType = mtype;
+  const n = G.missionCount+1;
+  document.getElementById('bid-sub').textContent = `Mission ${n} — ${mtype==='isru'?'ISRU deployment':'Supply mission'}. Review provider bids.`;
+  buildBidCards(mtype);
+  document.getElementById('bid-cancel').style.display = G.missionCount>0 ? 'inline-block' : 'none';
+  document.getElementById('bid-modal').classList.add('show');
+}
+
+function closeBid(){ document.getElementById('bid-modal').classList.remove('show'); }
+
+function confirmPartner(){
+  if(!G.selectedPartner) return;
+  closeBid();
+  launchMission(G.pendingType, G.selectedPartner);
+}
+
+function launchMission(mtype, pid){
+  G.running=true; G.missionType=mtype; G.missionDelays=0; G.missionCostAdd=0;
+  G.phaseIdx=0; G.phaseFrac=0; G.trail=[]; G.firedEvents.clear();
+  G.missionCount++; if(mtype==="supply") G.supplyCount++;
+  G.partnerUses[pid]++;
+  G.partnerRelScore[pid] = Math.min(G.partnerRelScore[pid]+1, 8);
+  G.selectedPartner = pid;
+  const p = PARTNERS[pid];
+  const cost = getPartnerCost(pid, mtype);
+  document.getElementById('btn-supply').disabled=true;
+  document.getElementById('btn-isru').disabled=true;
+  document.getElementById('s-mission').textContent='M'+G.missionCount;
+  document.getElementById('cur-logo').textContent=p.logo;
+  document.getElementById('cur-name').textContent=p.name;
+  document.getElementById('cur-stats').textContent=`$${cost}M · ${rnd(getPartnerRel(pid)*100)}% reliability · Lv${G.partnerRelScore[pid]} rel`;
+  document.getElementById('cur-uses').textContent=G.partnerUses[pid]+'×';
+  G.partnerHistory.push(pid);
+  document.getElementById('partner-history').innerHTML = G.partnerHistory.slice(-12).map(id=>{
+    const pp=PARTNERS[id];
+    return `<span class="ph-chip" style="background:${pp.chipBg};color:${pp.chipColor}">${pp.name}</span>`;
+  }).join('');
+  const phases = mtype==="isru" ? ISRU_PHASES : PHASES;
+  buildPhaseList(phases);
+  animate(phases, pid, cost);
+}
+
+function showAlert(type, text){
+  const el = document.getElementById('overlay-alert');
+  el.className='overlay-alert show '+type; el.textContent=text;
+  G.flashType=type; G.flashFrames=80;
+  if(G.alertTimer) clearTimeout(G.alertTimer);
+  G.alertTimer = setTimeout(()=>{el.classList.remove('show');G.flashType=null;},4000);
+}
+
+function addRiskLog(type, msg, logistic){
+  const feed = document.getElementById('risk-feed');
+  const placeholder = feed.querySelector('[style*="color:var"]');
+  if(placeholder) placeholder.remove();
+  const d = document.createElement('div');
+  d.className='risk-event '+type;
+  d.innerHTML=`<strong>${msg}</strong><br><span style="font-size:9px;opacity:0.85">${logistic}</span>`;
+  feed.insertBefore(d, feed.firstChild);
+  while(feed.children.length>6) feed.removeChild(feed.lastChild);
+}
+
+function tryRisks(phaseId, pid){
+  const rl = parseInt(document.getElementById('c-risk').value);
+  const rm = getEffectiveRiskMod(pid);
+  const pool = G.missionType==="isru" ? [...ISRU_RISKS, ...SUPPLY_RISKS.filter(r=>r.id==="flare")] : SUPPLY_RISKS;
+  pool.forEach(ev=>{
+    if(!ev.phases.includes(phaseId)) return;
+    const key = ev.id+'_'+phaseId+'_'+G.missionCount;
+    if(G.firedEvents.has(key)) return;
+    if(Math.random() < ev.prob[rl-1]*rm){
+      G.firedEvents.add(key);
+      const msg = (PARTNERS[pid].flavorRisk && ev.id==="flare")
+        ? PARTNERS[pid].flavorRisk.replace('{d}',ev.delay).replace('{c}',ev.cost)
+        : ev.msg.replace('{d}',ev.delay).replace('{c}',ev.cost);
+      showAlert(ev.type, ev.icon+'!');
+      addRiskLog(ev.type, `[${PARTNERS[pid].name}] ${msg}`, ev.logistic);
+      G.missionDelays+=ev.delay; G.missionCostAdd+=ev.cost;
+      G.totalDelays+=ev.delay;
+      if(ev.id==="cryo"&&G.isruDeployed) G.fuelStockpile=Math.max(0,G.fuelStockpile-8);
+      document.getElementById('s-delays').textContent=G.totalDelays+'d';
+    }
+  });
+}
+
+function buildPhaseList(phases){
+  document.getElementById('phase-list').innerHTML = phases.map(p=>`
+    <div class="phase-item" id="ph-${p.id}">
+      <span style="width:5px;height:5px;border-radius:50%;background:${p.color};flex-shrink:0;display:inline-block"></span>
+      <span style="flex:1;font-size:10px;font-weight:500;color:var(--text-primary)">${p.name}</span>
+      <span style="font-size:9px;color:var(--text-secondary)">D${p.days[0]}–${p.days[1]}</span>
+    </div>`).join('');
+}
+
+function setActivePhase(id, phases){
+  phases.forEach((p,i)=>{
+    const el=document.getElementById('ph-'+p.id); if(!el) return;
+    const ai=phases.findIndex(x=>x.id===id);
+    el.classList.toggle('active', p.id===id);
+    el.classList.toggle('done', i<ai);
+  });
+  const ph=phases.find(p=>p.id===id);
+  if(ph){
+    document.getElementById('c-title').textContent=ph.concept.title;
+    document.getElementById('c-body').textContent=ph.concept.body;
+    document.getElementById('phase-label').textContent=ph.name;
+  }
+}
+
+function EP(W,H){return{x:W*0.18,y:H*0.5,r:28}}
+function MP(W,H){return{x:W*0.78,y:H*0.5,r:17}}
+
+function tpt(phase,frac,W,H){
+  const E=EP(W,H),M=MP(W,H),cx=(E.x+M.x)/2;
+  if(phase==="park"){const a=Math.PI+frac*1.5*Math.PI;return{x:E.x+Math.cos(a)*(E.r+11),y:E.y+Math.sin(a)*(E.r+11)*0.68};}
+  if(phase==="tli"||phase==="transit"){const pp=phase==="tli"?frac*0.25:0.25+frac*0.55;const cpx=cx,cpy=E.y-H*0.35;return{x:lerp(lerp(E.x,cpx,pp),lerp(cpx,M.x,pp),pp),y:lerp(lerp(E.y,cpy,pp),lerp(cpy,M.y,pp),pp)};}
+  if(phase==="lo"){const a=-Math.PI*0.5+frac*2*Math.PI;return{x:M.x+Math.cos(a)*(M.r+9),y:M.y+Math.sin(a)*(M.r+9)*0.65};}
+  if(phase==="land"||phase==="ISRU deployment"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.15;return{x:lerp(M.x+Math.cos(-1.2)*(M.r+9),lx,frac),y:lerp(M.y+Math.sin(-1.2)*(M.r+9)*0.65,ly,frac)};}
+  if(phase==="surface"||phase==="Ice extraction begins"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.15;return{x:lx+Math.sin(frac*Math.PI*6)*2,y:ly};}
+  if(phase==="ascent"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.15;return{x:lerp(lx,M.x+Math.cos(-0.8)*(M.r+9),frac),y:lerp(ly,M.y+Math.sin(-0.8)*(M.r+9)*0.65,frac)};}
+  if(phase==="return"){const cpx=cx,cpy=E.y+H*0.33;return{x:lerp(lerp(M.x,cpx,frac),lerp(cpx,E.x,frac),frac),y:lerp(lerp(M.y,cpy,frac),lerp(cpy,E.y,frac),frac)};}
+  if(phase==="reentry"){const a=frac*1.2*Math.PI-0.3;return{x:E.x+Math.cos(a)*(E.r+8),y:E.y+Math.sin(a)*(E.r+8)*0.68};}
+  return{x:E.x,y:E.y};
+}
+
+function drawTraj(ship, trail, pid){
+  const c=document.getElementById('traj');
+  const W=c.offsetWidth||520; const H=300; const dpr=window.devicePixelRatio||1;
+  c.width=W*dpr; c.height=H*dpr; c.style.height=H+'px';
+  const ctx=c.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  const E=EP(W,H),M=MP(W,H),cx=(E.x+M.x)/2;
+
+  if(G.flashType==="danger"){ctx.fillStyle="rgba(162,45,45,0.07)";ctx.fillRect(0,0,W,H);}
+  if(G.flashType==="warn"){ctx.fillStyle="rgba(186,117,23,0.06)";ctx.fillRect(0,0,W,H);}
+  if(G.flashType==="success"){ctx.fillStyle="rgba(29,158,117,0.07)";ctx.fillRect(0,0,W,H);}
+
+  ctx.strokeStyle="rgba(55,138,221,0.09)";ctx.setLineDash([3,5]);ctx.lineWidth=0.8;
+  const st=80;
+  ctx.beginPath();for(let i=0;i<=st;i++){const f=i/st,cpx=cx,cpy=E.y-H*0.35;const x=lerp(lerp(E.x,cpx,f),lerp(cpx,M.x,f),f),y=lerp(lerp(E.y,cpy,f),lerp(cpy,M.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  ctx.beginPath();for(let i=0;i<=st;i++){const f=i/st,cpx=cx,cpy=E.y+H*0.33;const x=lerp(lerp(M.x,cpx,f),lerp(cpx,E.x,f),f),y=lerp(lerp(M.y,cpy,f),lerp(cpy,E.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  ctx.setLineDash([]);
+
+  if(G.isruDeployed){
+    const lx=M.x-M.r*0.5,ly=M.y+M.r*1.15;
+    ctx.fillStyle="#1D9E75";ctx.fillRect(lx-4,ly-2,8,5);ctx.fillRect(lx-8,ly-1,16,2);
+    ctx.font="bold 7px sans-serif";ctx.textAlign="center";ctx.fillStyle="#0F6E56";
+    ctx.fillText("ISRU",lx,ly+10);
+  }
+
+  ctx.fillStyle="#378ADD";ctx.beginPath();ctx.arc(E.x,E.y,E.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.2)";ctx.beginPath();ctx.arc(E.x-E.r*0.2,E.y-E.r*0.25,E.r*0.33,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#2C6E4E";ctx.beginPath();ctx.arc(E.x+E.r*0.14,E.y+E.r*0.07,E.r*0.22,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#B4B2A9";ctx.beginPath();ctx.arc(M.x,M.y,M.r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#888780";ctx.beginPath();ctx.arc(M.x-M.r*0.18,M.y-M.r*0.12,M.r*0.13,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#B5D4F4";ctx.beginPath();ctx.arc(M.x-M.r*0.05,M.y+M.r*0.33,M.r*0.11,0,Math.PI*2);ctx.fill();
+
+  ctx.font="500 9px -apple-system,sans-serif";ctx.textAlign="center";
+  ctx.fillStyle="#73726c";
+  ctx.fillText("EARTH",E.x,E.y+E.r+10);ctx.fillText("MOON",M.x,M.y+M.r+10);
+  ctx.font="9px -apple-system,sans-serif";ctx.textAlign="left";
+  ctx.fillStyle="rgba(127,119,221,0.5)";
+  ctx.fillText("Apr 1 ——— Apr 26",E.x+E.r+6,H-8);
+
+  if(trail.length>1){
+    for(let i=1;i<trail.length;i++){
+      const al=clamp(i/trail.length,0,1);
+      const isRet=trail[i].phase==="return"||trail[i].phase==="reentry";
+      const pCol=trail[i].partner?PARTNERS[trail[i].partner].color:"#378ADD";
+      const col=isRet?`rgba(127,119,221,${al*0.8})`:pCol+(Math.round(al*204).toString(16).padStart(2,'0'));
+      ctx.strokeStyle=col;ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();
+    }
+  }
+
+  if(ship&&pid){
+    ctx.save();ctx.translate(ship.x,ship.y);
+    ctx.fillStyle=PARTNERS[pid].color;
+    ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(3,3.5);ctx.lineTo(0,1.5);ctx.lineTo(-3,3.5);ctx.closePath();ctx.fill();
+    ctx.restore();
+  }
+}
+
+function initChart(){
+  if(costChart) costChart.destroy();
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?"#9c9a92":"#73726c", gc=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.05)";
+  costChart=new Chart(document.getElementById('cost-chart'),{
+    type:'bar',
+    data:{labels:[],datasets:[
+      {label:'Mission cost',  data:[],backgroundColor:"#378ADD",borderRadius:3},
+      {label:'Moon fuel save',data:[],backgroundColor:"#1D9E75",borderRadius:3},
+      {label:'Delay cost',    data:[],backgroundColor:"#D85A30",borderRadius:3},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:350},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+rnd(c.parsed.y)+'M'}}},
+      scales:{
+        x:{ticks:{color:tc,font:{size:8}},grid:{color:gc},title:{display:true,text:'Mission #',color:tc,font:{size:8}}},
+        y:{ticks:{color:tc,font:{size:8},callback:v=>'$'+v+'M'},grid:{color:gc},suggestedMin:0}
+      }
+    }
+  });
+}
+
+function animate(phases, pid, launchCost){
+  const ph=phases[G.phaseIdx];
+  G.phaseFrac=clamp(G.phaseFrac,0,1);
+  const W=document.getElementById('traj').offsetWidth||520;
+  const pos=tpt(ph.id,G.phaseFrac,W,300);
+  G.trail.push({...pos,phase:ph.id,partner:pid});
+  if(G.trail.length>400) G.trail.shift();
+  setActivePhase(ph.id,phases);
+
+  if(G.isruDeployed&&(ph.id==="surface"||ph.id==="Ice extraction begins")){
+    G.fuelStockpile=Math.min(120,G.fuelStockpile+0.04);
+    const pct=clamp(G.fuelStockpile/120,0,1);
+    document.getElementById('fuel-bar').style.width=(pct*100)+'%';
+    document.getElementById('fuel-pct').textContent=rnd(G.fuelStockpile)+'t';
+  }
+
+  if(G.flashFrames>0) G.flashFrames--; else G.flashType=null;
+  drawTraj(pos,G.trail,pid);
+  if(Math.random()<0.018) tryRisks(ph.id,pid);
+  G.phaseFrac+=ph.spd;
+
+  if(G.phaseFrac>=1){
+    G.phaseIdx++;
+    if(G.phaseIdx>=phases.length){
+      missionComplete(phases,pid,launchCost);
+      return;
+    }
+    G.phaseFrac=0;
+    if(G.missionType==="isru"&&phases[G.phaseIdx].id==="surface"){
+      G.isruDeployed=true;
+      showAlert('success','ISRU deployed! Ice extraction active.');
+      addRiskLog('success','ISRU online — LH₂/LOX production begun','Vertical integration milestone: you now manufacture propellant on-site.');
+      document.getElementById('fuel-savings').textContent='Producing fuel — discount builds with stockpile';
+    }
+    tryRisks(phases[G.phaseIdx].id,pid);
+  }
+  G.animFrame=requestAnimationFrame(()=>animate(phases,pid,launchCost));
+}
+
+function missionComplete(phases,pid,launchCost){
+  G.running=false;
+  const saving=moonFuelDiscount();
+  const totalCost=launchCost+G.missionCostAdd;
+  G.totalSpent+=totalCost;
+  document.getElementById('s-spent').textContent='$'+rnd(G.totalSpent)+'M';
+  if(costChart){
+    costChart.data.labels.push(G.missionCount);
+    costChart.data.datasets[0].data.push(launchCost);
+    costChart.data.datasets[1].data.push(saving);
+    costChart.data.datasets[2].data.push(G.missionCostAdd*3);
+    costChart.update();
+  }
+  const score=clamp(100-G.totalDelays*4-rnd(G.totalSpent/50)+(G.isruDeployed?20:0),0,100);
+  const scoreEl=document.getElementById('s-score');
+  scoreEl.textContent=score;
+  scoreEl.className='stat-val '+(score>70?'ok':score>40?'warn':'danger');
+  document.getElementById('btn-supply').disabled=false;
+  document.getElementById('phase-label').textContent='Mission '+G.missionCount+' complete — splashdown!';
+  checkISRUUnlock();
+  if(G.isruUnlocked) document.getElementById('btn-isru').disabled=false;
+  const p=PARTNERS[pid];
+  alert(`Mission ${G.missionCount} complete with ${p.name}!\n\nLaunch cost: $${launchCost}M\nDelays: ${G.missionDelays}d\nCost overrun: $${G.missionCostAdd}M\nRelationship level: ${G.partnerRelScore[pid]}/8\n\nPartner usage — SpaceX: ×${G.partnerUses.spacex}  Boeing: ×${G.partnerUses.boeing}  Blue Origin: ×${G.partnerUses.blueorigin}\n\nTotal spent: $${rnd(G.totalSpent)}M · Score: ${score}/100`);
+}
+
+function checkISRUUnlock(){
+  if(G.supplyCount>=3&&!G.isruUnlocked){
+    G.isruUnlocked=true;
+    document.getElementById('isru-lock').style.display='none';
+    document.getElementById('isru-hint').textContent='ISRU unlocked! Note: partner reliability is critical for this one-way hardware deployment.';
+    document.getElementById('isru-hint').style.color='#1D9E75';
+    addRiskLog('success','ISRU mission unlocked after '+G.supplyCount+' supply missions.','Make-vs-buy decision: which partner do you trust with the factory?');
+  }
+}
+
+initChart();
+update();
+drawTraj(null,[],null);
+window.addEventListener('resize',()=>{ if(!G.running) drawTraj(null,G.trail,null); });
+</script>
+</body>
+</html>
