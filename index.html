@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Artemis Logistics Mission — Marketing Supply Chain Game</title>
+<title>Solar Logistics — Space Supply Chain Strategy</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -12,489 +12,1188 @@
   --tx:#1a1a18;--tx2:#73726c;--tx3:#185FA5;
   --bd:rgba(0,0,0,0.13);--bd2:rgba(0,0,0,0.22);
   --r8:8px;--r12:12px;
-  --green:#1D9E75;--blue:#378ADD;--amber:#BA7517;--red:#A32D2D;--purple:#7F77DD;--orange:#D85A30;
+  --green:#1D9E75;--blue:#378ADD;--amber:#BA7517;--red:#A32D2D;
+  --purple:#7F77DD;--orange:#D85A30;--china:#D4160A;
+  --esa:#003399;--jaxa:#e8192c;--venus:#C8660A;
 }
 @media(prefers-color-scheme:dark){
-  :root{--bg:#1e1e1c;--bg2:#2a2a27;--bg3:#0c2a44;--tx:#e8e6df;--tx2:#9c9a92;--tx3:#85B7EB;--bd:rgba(255,255,255,0.11);--bd2:rgba(255,255,255,0.20);}
+  :root{--bg:#1e1e1c;--bg2:#2a2a27;--bg3:#0c2a44;
+    --tx:#e8e6df;--tx2:#9c9a92;--tx3:#85B7EB;
+    --bd:rgba(255,255,255,0.11);--bd2:rgba(255,255,255,0.20);}
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--tx);min-height:100vh}
-header{background:var(--bg);border-bottom:0.5px solid var(--bd);padding:11px 18px;display:flex;align-items:center;gap:12px}
-header h1{font-size:15px;font-weight:500}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--tx);min-height:100vh;overflow-x:hidden}
+.screen{position:fixed;inset:0;z-index:50;overflow-y:auto;background:var(--bg)}
+.screen.hidden{display:none!important}
+
+/* SHARED */
+.dark-header{background:#080e1f;padding:22px 20px 14px;text-align:center}
+.dark-header h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
+.dark-header p{font-size:11px;color:rgba(255,255,255,0.5)}
+.body-wrap{padding:14px 16px 24px;max-width:680px;margin:0 auto}
+.cta{display:block;width:100%;max-width:300px;margin:0 auto 20px;padding:12px;background:#185FA5;color:#E6F1FB;border:none;border-radius:var(--r12);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;text-align:center;transition:background .15s}
+.cta:hover{background:#0C447C}
+.cta.green{background:#0F6E56}.cta.green:hover{background:#085041}
+.cta.amber{background:#854F0B;color:#FAEEDA}.cta.amber:hover{background:#633806}
+.cta.venus{background:#8B4400;color:#ffd6a0}.cta.venus:hover{background:#6b3300}
+.panel{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--r12);padding:10px 13px;margin-bottom:10px}
+.pt{font-size:10px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:500px){.igrid{grid-template-columns:1fr}}
+.icard{background:var(--bg2);border-radius:var(--r8);padding:9px 11px;border:0.5px solid var(--bd)}
+.icard h3{font-size:11px;font-weight:500;margin-bottom:3px}
+.icard p{font-size:10px;color:var(--tx2);line-height:1.5}
+.icard.usa{border-left:3px solid var(--blue)}
+.icard.china{border-left:3px solid var(--china)}
+.icard.esa{border-left:3px solid var(--esa)}
+.icard.jaxa{border-left:3px solid var(--jaxa)}
+.icard.venus-card{border-left:3px solid var(--venus)}
+
+/* INTRO */
+.hero{background:#080e1f;padding:28px 20px 18px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 25% 50%,rgba(55,138,221,0.18) 0%,transparent 50%),radial-gradient(ellipse at 75% 50%,rgba(212,22,10,0.12) 0%,transparent 50%)}
+.hero-title{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;position:relative}
+.hero-title .blue{color:#5aabff}.hero-title .red{color:#ff5a52}
+.hero-sub{font-size:12px;color:rgba(255,255,255,0.45);position:relative;margin-bottom:14px}
+.intro-sec{margin-bottom:16px}
+.intro-sec h2{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:6px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)}
+.obj-list{display:flex;flex-direction:column;gap:5px}
+.obj{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--tx2);line-height:1.4}
+.obj-n{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-top:1px}
+
+/* YEAR BANNER */
+.year-banner{background:linear-gradient(135deg,#0a1628 0%,#1a2a4a 100%);border-radius:var(--r12);padding:16px;text-align:center;margin-bottom:12px}
+.year-banner .yr{font-size:32px;font-weight:700;color:#fff;margin-bottom:2px}
+.year-banner .yr-sub{font-size:11px;color:rgba(255,255,255,0.5)}
+.year-banner .flags{font-size:20px;margin-bottom:6px}
+
+/* CONFIG */
+.cfg-note{font-size:11px;color:var(--tx2);background:var(--bg3);border-radius:var(--r8);padding:7px 12px;margin-bottom:12px;text-align:center}
+.cfg-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.cfg-lbl{width:88px;font-size:11px;color:var(--tx2);flex-shrink:0}
+.cfg-row input[type=range]{flex:1;accent-color:var(--blue)}
+.cfg-val{width:34px;text-align:right;font-size:11px;font-weight:500;color:var(--tx)}
+.cfg-desc{font-size:10px;color:var(--tx2);margin-top:1px;margin-bottom:7px;padding-left:96px}
+.mission-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+@media(max-width:420px){.mission-btns{grid-template-columns:1fr}}
+.mission-btn{border:0.5px solid var(--bd2);border-radius:var(--r12);padding:12px;cursor:pointer;background:var(--bg);transition:border .15s,background .15s;text-align:center}
+.mission-btn:hover{background:var(--bg2)}
+.mission-btn.selected{border:2px solid #185FA5;background:var(--bg3)}
+.mission-btn.venus-mode.selected{border:2px solid var(--venus);background:#fff3e0}
+.mission-btn h3{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.mission-btn p{font-size:10px;color:var(--tx2);line-height:1.4}
+.mission-btn .req{font-size:10px;margin-top:4px;padding:2px 6px;border-radius:3px;display:inline-block}
+.req.locked{background:#FAEEDA;color:#854F0B}.req.ok{background:#EAF3DE;color:#3B6D11}.req.venus-ok{background:#ffd6a0;color:#8B4400}
+.impact-row{display:flex;align-items:center;gap:7px;padding:6px 8px;background:var(--bg);border-radius:var(--r8);border-left:3px solid transparent;margin-bottom:4px}
+
+/* SHIP SELECT */
+.ships-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media(max-width:580px){.ships-grid{grid-template-columns:1fr}}
+.ship-card{border:0.5px solid var(--bd);border-radius:var(--r12);padding:10px;cursor:pointer;transition:border .2s,background .2s;background:var(--bg);position:relative;text-align:center}
+.ship-card:hover{background:var(--bg2)}
+.ship-card.selected{border:2px solid #185FA5;background:var(--bg3)}
+.ship-card.recommended::after{content:"Recommended";position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9px;background:#EAF3DE;color:#3B6D11;padding:1px 8px;border-radius:3px;white-space:nowrap}
+.ship-svg-wrap{height:100px;display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px}
+.ship-name{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:1px}
+.ship-vehicle{font-size:10px;color:var(--tx2);margin-bottom:6px}
+.ship-stats{display:flex;flex-direction:column;gap:2px;margin-bottom:5px}
+.ship-stat{display:flex;justify-content:space-between;font-size:10px}
+.ship-stat .lbl{color:var(--tx2)}.ship-stat .val{font-weight:500;color:var(--tx)}
+.bar-wrap{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-top:1px;margin-bottom:2px}
+.bar-fill{height:100%;border-radius:2px}
+.ship-tradeoff{font-size:10px;color:var(--tx2);line-height:1.4;border-top:0.5px solid var(--bd);padding-top:5px;margin-top:3px;text-align:left}
+.ship-tradeoff strong{color:var(--tx)}
+
+/* COUNTDOWN */
+#countdown{background:#080e1f}
+.cd-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center;position:relative;z-index:1}
+.cd-stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+.cd-number{font-size:108px;font-weight:700;color:#ff2222;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums;text-shadow:0 0 50px rgba(255,34,34,0.35)}
+.cd-number.go{color:#1D9E75;font-size:68px;text-shadow:0 0 50px rgba(29,158,117,0.45)}
+.cd-t{font-size:14px;color:#ff4444;letter-spacing:.1em;margin-bottom:2px}
+.cd-ship{font-size:17px;font-weight:500;color:#fff;margin-bottom:3px}
+.cd-veh{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:18px}
+.cd-stat{font-size:11px;color:rgba(255,255,255,0.38);min-height:17px}
+.cd-bars{display:flex;gap:5px;margin-top:18px;justify-content:center}
+.cd-bar{width:5px;border-radius:3px;background:rgba(255,255,255,0.1);transition:background .25s}
+.cd-bar.active{background:#ff4444}.cd-bar.done{background:rgba(255,68,68,0.25)}
+
+/* DIPLOMACY SCREEN */
+#diplomacy{background:var(--bg)}
+.diplo-header{background:linear-gradient(135deg,#0a1628 0%,#1a3060 100%);padding:24px 20px 18px;text-align:center}
+.diplo-header h1{font-size:20px;font-weight:600;color:#fff;margin-bottom:4px}
+.diplo-header p{font-size:11px;color:rgba(255,255,255,0.5)}
+.agency-card{border:0.5px solid var(--bd);border-radius:var(--r12);padding:14px;margin-bottom:10px;background:var(--bg)}
+.agency-card h2{font-size:14px;font-weight:500;color:var(--tx);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.agency-card p{font-size:11px;color:var(--tx2);line-height:1.55;margin-bottom:10px}
+.diplo-btns{display:flex;gap:7px}
+.diplo-btn{flex:1;padding:9px;border:0.5px solid var(--bd2);border-radius:var(--r8);cursor:pointer;font-size:11px;font-weight:500;font-family:inherit;text-align:center;transition:background .15s;background:var(--bg)}
+.diplo-btn:hover{background:var(--bg2)}
+.diplo-btn.accept{background:#0F6E56;color:#E1F5EE;border-color:#0F6E56}
+.diplo-btn.accept:hover{background:#085041}
+.diplo-btn.decline{background:var(--bg2)}
+.diplo-result{font-size:10px;color:var(--tx2);margin-top:6px;padding:5px 8px;border-radius:var(--r8);background:var(--bg2)}
+
+/* MAIN GAME */
+#game{display:none}
+header{background:var(--bg);border-bottom:0.5px solid var(--bd);padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+header h1{font-size:13px;font-weight:500}
 header p{font-size:10px;color:var(--tx2)}
-.badge{font-size:10px;padding:2px 8px;border-radius:4px;background:var(--bg3);color:var(--tx3);margin-left:auto}
-#app{display:grid;grid-template-columns:1fr 320px;min-height:calc(100vh - 50px)}
-@media(max-width:780px){#app{grid-template-columns:1fr}}
-#viz{border-right:0.5px solid var(--bd);padding:10px;background:var(--bg);display:flex;flex-direction:column;gap:7px}
-#dash{padding:9px;display:flex;flex-direction:column;gap:6px;background:var(--bg2);overflow-y:auto}
+.hbadge{font-size:10px;padding:2px 6px;border-radius:4px}
+.hbadge.blue{background:var(--bg3);color:var(--tx3)}
+.hbadge.red{background:#fff0ef;color:var(--china)}
+.hbadge.green{background:#EAF3DE;color:#3B6D11}
+.hbadge.purple{background:#EEEDFE;color:#534AB7}
+.hbadge.yellow{background:#FAEEDA;color:#854F0B}
+.hbadge.gray{background:var(--bg2);color:var(--tx2);border:0.5px solid var(--bd)}
+#app{display:grid;grid-template-columns:1fr 310px;min-height:calc(100vh - 44px)}
+@media(max-width:740px){#app{grid-template-columns:1fr}}
+#viz{border-right:0.5px solid var(--bd);padding:8px;background:var(--bg);display:flex;flex-direction:column;gap:5px}
+#dash{padding:7px;display:flex;flex-direction:column;gap:5px;background:var(--bg2);overflow-y:auto}
 canvas{width:100%;display:block}
-.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.sc{background:var(--bg2);border-radius:var(--r8);padding:6px 8px}
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.sc{background:var(--bg2);border-radius:var(--r8);padding:5px 7px}
 .sl{font-size:10px;color:var(--tx2);margin-bottom:1px}
-.sv{font-size:15px;font-weight:500;color:var(--tx)}
+.sv{font-size:13px;font-weight:500;color:var(--tx)}
 .sv.warn{color:var(--amber)}.sv.ok{color:var(--green)}.sv.danger{color:var(--red)}
-.panel{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--r12);padding:8px 11px}
-.pt{font-size:10px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-.cc{background:var(--bg2);border-radius:var(--r8);padding:7px 9px}
-.ct{font-size:11px;font-weight:500;color:var(--tx);margin-bottom:2px}
-.cb{font-size:10px;color:var(--tx2);line-height:1.5}
-.cr{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.cl{width:66px;font-size:10px;color:var(--tx2);flex-shrink:0}
-.cr input[type=range]{flex:1;accent-color:var(--blue)}
-.cv{width:30px;text-align:right;font-size:10px;font-weight:500;color:var(--tx)}
-button{background:transparent;border:0.5px solid var(--bd2);border-radius:var(--r8);padding:5px 11px;font-size:11px;cursor:pointer;color:var(--tx);font-family:inherit;transition:background .15s}
+.dpanel{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--r12);padding:7px 10px}
+.dpt{font-size:10px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.dcc{background:var(--bg2);border-radius:var(--r8);padding:5px 8px}
+.dct{font-size:11px;font-weight:500;color:var(--tx);margin-bottom:1px}
+.dcb{font-size:10px;color:var(--tx2);line-height:1.45}
+button{background:transparent;border:0.5px solid var(--bd2);border-radius:var(--r8);padding:5px 10px;font-size:11px;cursor:pointer;color:var(--tx);font-family:inherit;transition:background .15s}
 button:hover{background:var(--bg2)}
 button.bp{background:#185FA5;color:#E6F1FB;border-color:#185FA5}
 button.bp:hover{background:#0C447C}
 button.bi{background:#0F6E56;color:#E1F5EE;border-color:#0F6E56}
 button.bi:hover{background:#085041}
+button.bv{background:#8B4400;color:#ffd6a0;border-color:#8B4400}
+button.bv:hover{background:#6b3300}
 button:disabled{opacity:0.35;cursor:default}
-.fb{height:7px;background:var(--bg2);border-radius:4px;overflow:hidden;margin-top:3px}
-.ff{height:100%;border-radius:4px;background:var(--green);transition:width .4s}
-.ov{position:absolute;top:8px;right:8px;font-size:10px;padding:3px 8px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:5}
+.fb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:2px}
+.ff{height:100%;border-radius:3px;background:var(--green);transition:width .4s}
+.ff.china{background:var(--china)}.ff.esa{background:var(--esa)}.ff.jaxa{background:var(--jaxa)}.ff.venus{background:var(--venus)}
+.ov{position:absolute;top:6px;right:6px;font-size:10px;padding:3px 8px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:5;max-width:230px}
 .ov.show{opacity:1}
 .ov.danger{background:#FCEBEB;color:#501313}
 .ov.warn{background:#FAEEDA;color:#412402}
 .ov.success{background:#EAF3DE;color:#173404}
-.pi{display:flex;align-items:center;gap:5px;font-size:10px;padding:2px 4px;border-radius:3px;transition:background .2s}
-.pi.active{background:var(--bg3)}
-.pi.done{opacity:0.35}
-.rf{display:flex;flex-direction:column;gap:3px;max-height:90px;overflow-y:auto}
-.re{border-radius:4px;padding:3px 7px;font-size:10px;line-height:1.4;border-left:2px solid transparent}
+.ov.china-alert{background:#fff0ef;color:#7a0c07}
+.ov.diplo{background:#EEEDFE;color:#26215C}
+.pi{display:flex;align-items:center;gap:4px;font-size:10px;padding:2px 3px;border-radius:3px;transition:background .2s}
+.pi.active{background:var(--bg3)}.pi.done{opacity:0.35}
+.rf{display:flex;flex-direction:column;gap:2px;max-height:78px;overflow-y:auto}
+.re{border-radius:3px;padding:3px 6px;font-size:10px;line-height:1.35;border-left:2px solid transparent}
 .re.danger{background:#FCEBEB;border-color:#A32D2D;color:#501313}
 .re.warn{background:#FAEEDA;border-color:#854F0B;color:#412402}
 .re.success{background:#EAF3DE;border-color:#3B6D11;color:#173404}
 .re.info{background:#E6F1FB;border-color:#185FA5;color:#042C53}
+.re.china-alert{background:#fff0ef;border-color:#D4160A;color:#7a0c07}
+.re.diplo{background:#EEEDFE;border-color:#534AB7;color:#26215C}
+.re.venus-log{background:#fff3e0;border-color:#8B4400;color:#6b3300}
 .ph{display:flex;gap:3px;flex-wrap:wrap}
 .pc{font-size:9px;padding:2px 5px;border-radius:3px;font-weight:500}
-.hint{font-size:10px;color:var(--tx2)}
-.cprompt{background:var(--bg3);border-radius:var(--r8);padding:6px 9px;font-size:10px;color:var(--tx3);margin-top:5px}
-/* Modal */
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:flex-start;justify-content:center;padding-top:16px}
-#modal.show{display:flex}
-#mbox{background:var(--bg);border:0.5px solid var(--bd);border-radius:var(--r12);padding:16px;width:96%;max-width:490px;max-height:92vh;overflow-y:auto}
-.mh{font-size:14px;font-weight:500;color:var(--tx);margin-bottom:3px}
-.ms{font-size:11px;color:var(--tx2);margin-bottom:10px}
-.pcards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-@media(max-width:480px){.pcards{grid-template-columns:1fr}}
-.pcard{border:0.5px solid var(--bd);border-radius:var(--r8);padding:10px;cursor:pointer;transition:border .15s,background .15s;position:relative;margin-top:10px}
-.pcard:hover{background:var(--bg2)}
-.pcard.sel{border:2px solid #185FA5;background:var(--bg3)}
-.pcard.cheap::before{content:"Lowest cost";position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9px;background:#EAF3DE;color:#3B6D11;padding:1px 6px;border-radius:3px;white-space:nowrap}
-.pcard.best::before{content:"Most reliable";position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9px;background:#E6F1FB;color:#185FA5;padding:1px 6px;border-radius:3px;white-space:nowrap}
-.plogo{font-size:18px;margin-bottom:3px}
-.pname{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:5px}
-.pst{display:flex;justify-content:space-between;font-size:10px;color:var(--tx2);margin-bottom:2px}
-.pst span:last-child{font-weight:500;color:var(--tx)}
-.prb{height:3px;background:var(--bg2);border-radius:2px;margin-top:2px;overflow:hidden}
-.prf{height:100%;border-radius:2px}
-.mconcept{background:var(--bg2);border-radius:var(--r8);padding:8px 10px;margin-bottom:10px;font-size:10px;color:var(--tx2);line-height:1.5}
-.mconcept strong{color:var(--tx)}
-.mact{display:flex;justify-content:flex-end;gap:6px}
-.chart-leg{display:flex;justify-content:center;gap:14px;font-size:9px;color:var(--tx2)}
+.china-border{border-left:3px solid var(--china)}
+.esa-border{border-left:3px solid var(--esa)}
+.jaxa-border{border-left:3px solid var(--jaxa)}
+.venus-border{border-left:3px solid var(--venus)}
+.tension-bar{height:3px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-top:2px}
+.tension-fill{height:100%;border-radius:2px;background:var(--china);transition:width .4s}
+.chart-leg{display:flex;justify-content:center;gap:10px;font-size:9px;color:var(--tx2)}
 .ld{display:inline-block;width:8px;height:3px;border-radius:1px;vertical-align:middle;margin-right:2px}
-.about{font-size:10px;color:var(--tx2);line-height:1.6;padding:4px 0}
+.competitor-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+
+/* AAR */
+#endscreen{display:none;position:fixed;inset:0;background:var(--bg);z-index:90;overflow-y:auto;padding:18px}
+#endscreen.show{display:block}
+.end-inner{max-width:560px;margin:0 auto}
+.end-title{font-size:20px;font-weight:600;text-align:center;margin-bottom:3px}
+.end-sub{font-size:11px;color:var(--tx2);text-align:center;margin-bottom:14px}
+.score-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;justify-content:center}
+.score-card{border-radius:var(--r12);padding:12px;text-align:center;min-width:120px;flex:1}
+.score-card h3{font-size:10px;font-weight:500;margin-bottom:5px}
+.score-card .big{font-size:26px;font-weight:600;margin-bottom:2px}
+.score-card p{font-size:10px;color:var(--tx2)}
+.verdict{background:var(--bg2);border-radius:var(--r12);padding:11px;margin-bottom:11px;text-align:center}
+.verdict h2{font-size:14px;font-weight:500;margin-bottom:4px}
+.verdict p{font-size:11px;color:var(--tx2);line-height:1.55}
+.aar-sec{background:var(--bg2);border-radius:var(--r12);padding:11px;margin-bottom:11px}
+.aar-t{font-size:10px;font-weight:500;color:var(--tx);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.fin-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.fin-card{background:var(--bg);border-radius:var(--r8);padding:8px;text-align:center}
+.fin-card .lbl{font-size:10px;color:var(--tx2);margin-bottom:2px}
+.fin-card .val{font-size:18px;font-weight:600}
+.end-row{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:0.5px solid var(--bd)}
+.end-row:last-child{border:none}
+
+/* Rocket animations */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes flame{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.7;transform:scaleY(.85)}}
+@keyframes exhaust{0%{opacity:.8;transform:translateY(0)}100%{opacity:0;transform:translateY(18px)}}
+.rf-anim{animation:float 2.5s ease-in-out infinite}
+.fl{animation:flame .6s ease-in-out infinite}
+.ex{animation:exhaust .8s ease-out infinite}
+
+/* Venus cloud city visual */
+.venus-scene{background:linear-gradient(180deg,#1a0a00 0%,#4a1500 25%,#c85a00 55%,#e8a030 75%,#f0c060 100%);border-radius:var(--r12);position:relative;overflow:hidden;height:160px;margin-bottom:10px}
+.cloud-layer{position:absolute;left:0;right:0;background:rgba(255,220,150,0.25);border-radius:50px}
+.aphrodite-station{position:absolute;left:50%;transform:translateX(-50%);bottom:45%;background:rgba(255,255,255,0.9);border-radius:20px 20px 8px 8px;padding:4px 12px;font-size:10px;font-weight:500;color:#4a1500;white-space:nowrap}
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>Artemis Logistics Mission</h1>
-    <p>A marketing supply chain simulation — partner selection, risk management &amp; vertical integration</p>
-  </div>
-  <span class="badge">Educational Game</span>
-</header>
 
-<div id="app">
-  <div id="viz">
+<!-- INTRO -->
+<div id="intro" class="screen">
+  <div class="hero">
     <div style="position:relative">
-      <canvas id="traj" height="390"></canvas>
-      <div id="ov" class="ov"></div>
-    </div>
-    <div style="position:relative;height:115px"><canvas id="chart" height="115"></canvas></div>
-    <div class="chart-leg">
-      <span><span class="ld" style="background:#378ADD"></span>Mission cost</span>
-      <span><span class="ld" style="background:#1D9E75"></span>Fuel saving</span>
-      <span><span class="ld" style="background:#D85A30"></span>Delay cost</span>
-    </div>
-    <div class="panel">
-      <div class="pt">Risk event log</div>
-      <div class="rf" id="rfeed"><div style="font-size:10px;color:var(--tx2)">No events yet.</div></div>
+      <div class="hero-title">Solar <span class="blue">Logistics</span></div>
+      <div class="hero-sub">Space supply chain strategy — Moon base, Venus cloud city, and the race for the solar system</div>
+      <canvas id="intro-canvas" height="140" style="width:100%;max-width:500px;display:block;margin:0 auto"></canvas>
     </div>
   </div>
-
-  <div id="dash">
-    <div class="srow">
-      <div class="sc"><div class="sl">Mission</div><div class="sv" id="smis">—</div></div>
-      <div class="sc"><div class="sl">Spent</div><div class="sv warn" id="sspent">$0M</div></div>
-      <div class="sc"><div class="sl">Delays</div><div class="sv danger" id="sdel">0d</div></div>
-      <div class="sc"><div class="sl">Score</div><div class="sv ok" id="sscore">100</div></div>
+  <div class="body-wrap">
+    <div class="intro-sec">
+      <h2>The mission</h2>
+      <p style="font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:9px">2025–2032. NASA's Artemis and China's Chang'e race to the lunar south pole for water ice — the key to rocket fuel manufactured off-Earth. By year 7, the most ambitious logistics challenge in history opens: Venus orbit. At 52km altitude, pressure and temperature are Earth-like. HAVOC cloud platforms can mine sulfur dioxide for synthetic fuel and gather phosphine — possible evidence of life. The question isn't whether to go. It's whether your supply chain can get you there first.</p>
+      <div class="igrid">
+        <div class="icard usa"><h3>🇺🇸 Artemis (You)</h3><p>Lead NASA. Select commercial partners, manage cargo and crew, deploy ISRU, court ESA and JAXA as risk-sharing partners, and reach Venus.</p></div>
+        <div class="icard china"><h3>🇨🇳 Chang'e (AI)</h3><p>Autonomous, methodical, well-funded. Launches once per year. Gets faster as tension rises. First to ISRU wins the fuel economy.</p></div>
+        <div class="icard esa"><h3>🇪🇺 ESA (Year 3)</h3><p>Offers Ariane 6 capacity and risk-sharing on ISRU in exchange for 30% of your fuel stockpile rights. Accept or compete.</p></div>
+        <div class="icard jaxa"><h3>🇯🇵 JAXA (Year 3)</h3><p>Offers south pole data and 25% cost reduction on supply missions in exchange for joint base naming rights. Accept or compete.</p></div>
+      </div>
     </div>
+    <div class="intro-sec">
+      <h2>Game structure</h2>
+      <div class="obj-list">
+        <div class="obj"><div class="obj-n" style="background:#E6F1FB;color:#185FA5">Y1</div><div><strong style="color:var(--tx)">Years 1–2:</strong> Moon supply missions. Build relationship with SpaceX, Boeing, or Blue Origin. Race China to ISRU.</div></div>
+        <div class="obj"><div class="obj-n" style="background:#EAF3DE;color:#3B6D11">Y3</div><div><strong style="color:var(--tx)">Year 3:</strong> ESA and JAXA diplomacy moment. Accept risk-sharing partnerships or compete solo.</div></div>
+        <div class="obj"><div class="obj-n" style="background:#FAEEDA;color:#854F0B">Y4</div><div><strong style="color:var(--tx)">Years 4–6:</strong> Expanded Moon operations. Coalition members share cost and risk. Build fuel stockpile for Venus transit.</div></div>
+        <div class="obj"><div class="obj-n" style="background:#ffd6a0;color:#8B4400">Y7</div><div><strong style="color:var(--tx)">Year 7:</strong> Venus unlocks. Deploy HAVOC aeroshell platforms at 52km altitude. Mine SO₂ and phosphine. Build Aphrodite Station.</div></div>
+      </div>
+    </div>
+    <div class="intro-sec">
+      <h2>All 3 vehicles are now crew-rated (0–4)</h2>
+      <div class="igrid">
+        <div class="icard"><h3>🚀 SpaceX Starship</h3><p>$80M base · 5t cargo bonus · 78% reliability · 100% risk mod · Best value at high relationship.</p></div>
+        <div class="icard"><h3>✈ Boeing SLS/Orion</h3><p>$145M base · No cargo bonus · 93% reliability · 55% risk mod · Best for ISRU and crewed.</p></div>
+        <div class="icard"><h3>🌐 Blue Origin New Glenn</h3><p>$105M base · 2t cargo bonus · 72% reliability · 135% risk mod · High risk, drops fast with loyalty.</p></div>
+      </div>
+    </div>
+    <button class="cta" onclick="goToConfig()">Begin campaign →</button>
+  </div>
+</div>
 
+<!-- CONFIG -->
+<div id="cfgscreen" class="screen hidden">
+  <div class="dark-header">
+    <h1 id="cfg-header-title">Configure mission</h1>
+    <p id="cfg-header-sub">Set parameters — then choose your launch vehicle</p>
+  </div>
+  <div class="body-wrap">
+    <div class="year-banner" id="year-banner">
+      <div class="flags" id="coalition-flags">🇺🇸</div>
+      <div class="yr" id="year-display">Year 1</div>
+      <div class="yr-sub" id="year-sub">Mission 1 of 2 this year</div>
+    </div>
+    <div class="cfg-note" id="cfg-note">Supply missions only — complete 3 to unlock ISRU</div>
+    <div id="cfg-type-wrap">
+      <div class="panel" style="margin-bottom:10px">
+        <div class="pt">Mission type</div>
+        <div class="mission-btns" id="mission-type-btns"></div>
+      </div>
+    </div>
     <div class="panel">
-      <div class="pt">Current partner</div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div id="plogo" style="font-size:20px">—</div>
-        <div>
-          <div id="pname" style="font-size:12px;font-weight:500;color:var(--tx)">None yet</div>
-          <div id="pstats" style="font-size:10px;color:var(--tx2)">Select a mission to begin</div>
+      <div class="pt">Payload parameters</div>
+      <div class="cfg-row"><span class="cfg-lbl">Cargo (tonnes)</span><input type="range" id="cfg-cargo" min="5" max="27" value="14" step="1" oninput="onCfgChange()"><span class="cfg-val" id="vcargo">14t</span></div>
+      <div class="cfg-desc">Heavier payloads increase mission value but raise cost.</div>
+      <div class="cfg-row"><span class="cfg-lbl">Crew size</span><input type="range" id="cfg-crew" min="0" max="4" value="4" step="1" oninput="onCfgChange()"><span class="cfg-val" id="vcrew">4</span></div>
+      <div class="cfg-desc">All vehicles are crew-rated. Larger crew increases score and cost.</div>
+    </div>
+    <div class="panel">
+      <div class="pt">Risk tolerance</div>
+      <div class="cfg-row"><span class="cfg-lbl">Risk level</span><input type="range" id="cfg-risk" min="1" max="3" value="2" step="1" oninput="onCfgChange()"><span class="cfg-val" id="vrisk">Medium</span></div>
+      <div class="cfg-desc" id="risk-desc">Moderate risk — some disruptions likely.</div>
+    </div>
+    <div class="panel" style="background:var(--bg3);border-color:rgba(24,95,165,0.2)">
+      <div class="pt" style="color:var(--tx3)">How your config affects each vehicle</div>
+      <div id="cfg-impact"></div>
+    </div>
+    <button class="cta green" onclick="goToShipSelect()">Choose launch vehicle →</button>
+  </div>
+</div>
+
+<!-- SHIP SELECT -->
+<div id="shipselect" class="screen hidden">
+  <div class="dark-header">
+    <h1>Select launch vehicle</h1>
+    <p>Default for this mission — swap in future missions</p>
+  </div>
+  <div class="body-wrap">
+    <div class="cfg-note" id="ship-summary">—</div>
+    <div class="ships-grid" id="ships-grid"></div>
+    <div style="text-align:center">
+      <div id="ship-note" style="font-size:11px;color:var(--tx2);margin-bottom:10px">Select a vehicle to continue</div>
+      <button class="cta green" id="ship-confirm" onclick="confirmShip()" disabled style="display:inline-block;width:auto;padding:11px 28px;margin-bottom:8px">Launch mission →</button>
+    </div>
+    <p style="font-size:10px;color:var(--tx2);text-align:center;padding-bottom:16px">You can switch providers in future missions</p>
+  </div>
+</div>
+
+<!-- COUNTDOWN -->
+<div id="countdown" class="screen hidden" style="background:#080e1f">
+  <canvas id="cd-stars" class="cd-stars"></canvas>
+  <div class="cd-inner">
+    <div style="font-size:12px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:10px">Mission Control</div>
+    <div class="cd-ship" id="cd-ship">—</div>
+    <div class="cd-veh" id="cd-veh">—</div>
+    <div class="cd-t" id="cd-t">T-MINUS</div>
+    <div class="cd-number" id="cd-num">10</div>
+    <div class="cd-stat" id="cd-stat">All systems nominal</div>
+    <div class="cd-bars" id="cd-bars"></div>
+  </div>
+</div>
+
+<!-- DIPLOMACY -->
+<div id="diplomacy" class="screen hidden">
+  <div class="diplo-header">
+    <h1>Year 3 — Diplomatic overtures</h1>
+    <p>Two agencies have approached Artemis with partnership proposals</p>
+  </div>
+  <div class="body-wrap">
+    <p style="font-size:11px;color:var(--tx2);line-height:1.6;margin-bottom:14px">China's progress has alarmed both ESA and JAXA. Each agency is offering a different kind of risk-sharing partnership. You can accept both, one, or neither — but declining means they may eventually align with China instead.</p>
+    <div class="agency-card esa-border">
+      <h2><span style="font-size:20px">🇪🇺</span> European Space Agency — Ariane 6 partnership</h2>
+      <p>ESA offers dedicated Ariane 6 launch slots and absorbs 35% of cost overruns on your next 3 missions in exchange for 30% rights to your lunar fuel stockpile. The joint base becomes the "Artemis-ESA Lunar Gateway."</p>
+      <div class="diplo-btns">
+        <button class="diplo-btn accept" onclick="decideDiplo('esa','accept')">Accept partnership</button>
+        <button class="diplo-btn decline" onclick="decideDiplo('esa','decline')">Decline</button>
+      </div>
+      <div class="diplo-result hidden" id="esa-result"></div>
+    </div>
+    <div class="agency-card jaxa-border">
+      <h2><span style="font-size:20px">🇯🇵</span> JAXA — Lunar south pole data sharing</h2>
+      <p>JAXA shares SLIM lander data on south pole ice deposits (reducing your ISRU risk modifier by 20%) and contributes $15M per supply mission in exchange for joint base naming rights and 1 Japanese crew slot per mission.</p>
+      <div class="diplo-btns">
+        <button class="diplo-btn accept" onclick="decideDiplo('jaxa','accept')">Accept partnership</button>
+        <button class="diplo-btn decline" onclick="decideDiplo('jaxa','decline')">Decline</button>
+      </div>
+      <div class="diplo-result hidden" id="jaxa-result"></div>
+    </div>
+    <button class="cta" id="diplo-continue" onclick="afterDiplo()" disabled>Continue to Year 4 →</button>
+  </div>
+</div>
+
+<!-- MAIN GAME -->
+<div id="game">
+  <header>
+    <div><h1 id="hdr-title">Solar Logistics</h1><p id="hdr-sub">Year 1</p></div>
+    <span class="hbadge blue">🇺🇸 Artemis</span>
+    <span class="hbadge red">🇨🇳 Chang'e</span>
+    <span class="hbadge green" id="esa-badge" style="display:none">🇪🇺 ESA</span>
+    <span class="hbadge purple" id="jaxa-badge" style="display:none">🇯🇵 JAXA</span>
+    <span class="hbadge yellow" id="venus-badge" style="display:none">♀ Venus</span>
+    <span class="hbadge gray" id="vehicle-badge">Vehicle: —</span>
+    <button class="bp" id="next-btn" onclick="goToNextMission()" style="display:none;margin-left:auto;font-size:10px;padding:4px 9px">Next mission →</button>
+  </header>
+  <div id="app">
+    <div id="viz">
+      <div style="position:relative">
+        <canvas id="traj" height="360"></canvas>
+        <div id="ov" class="ov"></div>
+      </div>
+      <div style="position:relative;height:100px"><canvas id="chart" height="100"></canvas></div>
+      <div class="chart-leg">
+        <span><span class="ld" style="background:#378ADD"></span>Cost</span>
+        <span><span class="ld" style="background:#1D9E75"></span>Fuel save</span>
+        <span><span class="ld" style="background:#D85A30"></span>Delays</span>
+      </div>
+      <div class="dpanel">
+        <div class="dpt">Event log</div>
+        <div class="rf" id="rfeed"><div style="font-size:10px;color:var(--tx2)">Awaiting launch...</div></div>
+      </div>
+    </div>
+    <div id="dash">
+      <div class="srow">
+        <div class="sc"><div class="sl">Year / Mission</div><div class="sv" id="smis">—</div></div>
+        <div class="sc"><div class="sl">Total spent</div><div class="sv warn" id="sspent">$0M</div></div>
+        <div class="sc"><div class="sl">Delays</div><div class="sv danger" id="sdel">0d</div></div>
+        <div class="sc"><div class="sl">Score</div><div class="sv ok" id="sscore">100</div></div>
+      </div>
+
+      <!-- Competitor panel -->
+      <div class="dpanel china-border">
+        <div class="dpt">🇨🇳 Chang'e — competitor status</div>
+        <div class="competitor-row">
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+              <span style="font-size:10px;color:var(--tx2)" id="china-phase">Monitoring...</span>
+              <span style="font-size:10px;font-weight:500;color:var(--china)" id="china-score-lbl">0 pts</span>
+            </div>
+            <div class="fb"><div class="ff china" id="china-bar" style="width:0%"></div></div>
+          </div>
         </div>
-        <div style="margin-left:auto;text-align:right">
-          <div style="font-size:10px;color:var(--tx2)">Used</div>
-          <div id="puses" style="font-size:13px;font-weight:500;color:var(--tx)">0×</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:4px;font-size:10px">
+          <div style="color:var(--tx2)">Ice: <span id="cn-ice" style="font-weight:500;color:var(--tx)">Open</span></div>
+          <div style="color:var(--tx2)">Site: <span id="cn-site" style="font-weight:500;color:var(--tx)">Open</span></div>
+          <div style="color:var(--tx2)">Missions: <span id="cn-mc" style="font-weight:500;color:var(--tx)">0</span></div>
+        </div>
+        <div style="margin-top:4px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--tx2);margin-bottom:1px">Geopolitical tension<span id="tension-val">Low</span></div>
+          <div class="tension-bar"><div class="tension-fill" id="tension-bar" style="width:15%"></div></div>
         </div>
       </div>
-      <div style="margin-top:5px">
-        <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">History</div>
-        <div class="ph" id="phist"><span style="font-size:10px;color:var(--tx2)">No missions yet</span></div>
+
+      <!-- ESA panel (hidden until partner) -->
+      <div class="dpanel esa-border" id="esa-panel" style="display:none">
+        <div class="dpt">🇪🇺 ESA — risk-sharing partner</div>
+        <div style="font-size:10px;color:var(--tx2)">Absorbing 35% of cost overruns · Fuel rights: 30% stockpile</div>
+        <div class="fb" style="margin-top:4px"><div class="ff esa" id="esa-contrib-bar" style="width:70%"></div></div>
+        <div style="font-size:10px;color:var(--tx2);margin-top:2px">Ariane 6 slots remaining: <span id="esa-slots" style="font-weight:500;color:var(--tx)">3</span></div>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="pt">Mission config</div>
-      <div class="cr"><span class="cl">Cargo (t)</span><input type="range" id="ccargo" min="5" max="27" value="14" step="1" oninput="onCfg()"><span class="cv" id="vcargo">14</span></div>
-      <div class="cr"><span class="cl">Crew</span><input type="range" id="ccrew" min="0" max="4" value="4" step="1" oninput="onCfg()"><span class="cv" id="vcrew">4</span></div>
-      <div class="cr"><span class="cl">Risk level</span><input type="range" id="crisk" min="1" max="3" value="2" step="1" oninput="onCfg()"><span class="cv" id="vrisk">Med</span></div>
-      <div class="cprompt" id="cprompt">Set cargo, crew &amp; risk level above — then hit a mission button to see provider bids.</div>
-    </div>
-
-    <div style="display:flex;gap:5px;flex-wrap:wrap">
-      <button class="bp" id="bsup" onclick="openModal('supply')">New supply mission</button>
-      <button class="bi" id="bisru" onclick="openModal('isru')" disabled>ISRU mission <span id="ilock" style="font-size:9px;padding:1px 5px;border-radius:3px;background:#FAEEDA;color:#854F0B;margin-left:3px">locked</span></button>
-    </div>
-    <div class="hint" id="ihint">Complete 3 supply missions to unlock ISRU ice-mining</div>
-
-    <div class="panel">
-      <div class="pt">Lunar fuel stockpile</div>
-      <div style="display:flex;justify-content:space-between">
-        <span style="font-size:10px;color:var(--tx2)">LH2/LOX reserve</span>
-        <span style="font-size:11px;font-weight:500;color:#1D9E75" id="fpct">0t</span>
+      <!-- JAXA panel -->
+      <div class="dpanel jaxa-border" id="jaxa-panel" style="display:none">
+        <div class="dpt">🇯🇵 JAXA — risk-sharing partner</div>
+        <div style="font-size:10px;color:var(--tx2)">Contributing $15M/mission · ISRU risk modifier -20%</div>
+        <div style="font-size:10px;color:var(--tx2);margin-top:3px">Total JAXA contribution: <span id="jaxa-total" style="font-weight:500;color:var(--tx)">$0M</span></div>
       </div>
-      <div class="fb"><div class="ff" id="fbar" style="width:0%"></div></div>
-      <div style="font-size:10px;color:var(--tx2);margin-top:2px" id="fsav">ISRU not yet deployed</div>
-    </div>
 
-    <div class="panel">
-      <div class="pt">Logistics concept</div>
-      <div class="cc">
-        <div class="ct" id="ctit">Partner selection strategy</div>
-        <div class="cb" id="cbod">Configure your mission above then pick a launch provider. Spot buying vs. preferred supplier — each mission is a fresh sourcing decision.</div>
+      <!-- Venus panel -->
+      <div class="dpanel venus-border" id="venus-panel" style="display:none">
+        <div class="dpt">♀ Venus — HAVOC operations</div>
+        <div style="font-size:10px;color:var(--tx2)">Altitude: 52km · Aphrodite Station</div>
+        <div style="display:flex;gap:8px;margin-top:4px;font-size:10px">
+          <div style="flex:1;color:var(--tx2)">SO₂ mined: <span id="venus-so2" style="font-weight:500;color:var(--venus)">0t</span></div>
+          <div style="flex:1;color:var(--tx2)">Phosphine: <span id="venus-phos" style="font-weight:500;color:var(--venus)">0μg</span></div>
+        </div>
+        <div class="fb" style="margin-top:3px"><div class="ff venus" id="venus-bar" style="width:0%"></div></div>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="pt">Mission phases</div>
-      <div id="plist" style="display:flex;flex-direction:column;gap:2px"></div>
-    </div>
+      <div class="dpanel">
+        <div class="dpt">Current vehicle</div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <div id="plogo" style="font-size:18px">—</div>
+          <div><div id="pname" style="font-size:11px;font-weight:500;color:var(--tx)">None yet</div>
+          <div id="pstats" style="font-size:10px;color:var(--tx2)">Select a mission to begin</div></div>
+          <div style="margin-left:auto;text-align:right">
+            <div style="font-size:10px;color:var(--tx2)">Used</div>
+            <div id="puses" style="font-size:12px;font-weight:500;color:var(--tx)">0×</div>
+          </div>
+        </div>
+        <div style="margin-top:4px">
+          <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">History</div>
+          <div class="ph" id="phist"><span style="font-size:10px;color:var(--tx2)">No missions yet</span></div>
+        </div>
+      </div>
 
-    <div class="panel" style="background:var(--bg2);border-color:transparent">
-      <div class="pt">About</div>
-      <div class="about">
-        Built for marketing logistics education. Covers: vendor selection, spot vs. preferred supplier strategy, reliability vs. cost tradeoffs, vertical integration (ISRU), risk management, and supply chain visibility.<br><br>
-        Based on real NASA Artemis II trajectory and partner profiles. Run 3 supply missions to unlock the ISRU ice-mining mission.
+      <div class="dpanel">
+        <div class="dpt">Logistics concept</div>
+        <div class="dcc"><div class="dct" id="ctit">Mission underway</div><div class="dcb" id="cbod">Watch the trajectory. Phase labels light up as the mission progresses.</div></div>
+      </div>
+
+      <div class="dpanel">
+        <div class="dpt" id="fuel-title">Lunar fuel stockpile</div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:10px;color:var(--tx2)" id="fuel-lbl">LH2/LOX reserve</span>
+          <span style="font-size:11px;font-weight:500;color:#1D9E75" id="fpct">0t</span>
+        </div>
+        <div class="fb"><div class="ff" id="fbar" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--tx2);margin-top:2px" id="fsav">ISRU not yet deployed</div>
+      </div>
+
+      <div class="dpanel">
+        <div class="dpt">Mission phases</div>
+        <div id="plist" style="display:flex;flex-direction:column;gap:2px"></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Bid Modal -->
-<div id="modal">
-  <div id="mbox">
-    <div class="mh">Select launch partner</div>
-    <div class="ms" id="msub">Review bids and choose your provider.</div>
-    <div class="pcards" id="pcards"></div>
-    <div class="mconcept" id="mconcept"></div>
-    <div class="mact">
-      <button id="bcancel" onclick="closeModal()" style="display:none">Cancel</button>
-      <button class="bp" id="bconfirm" onclick="confirmPartner()" disabled>Launch with selected partner</button>
+<!-- AAR -->
+<div id="endscreen">
+  <div class="end-inner">
+    <div style="text-align:center;margin-bottom:16px">
+      <div class="end-title" id="end-title">After-Action Report</div>
+      <div class="end-sub">Solar Logistics Campaign — 2025–2032</div>
     </div>
+    <div class="score-row" id="score-row"></div>
+    <div class="verdict"><h2 id="verdict-title">—</h2><p id="verdict-body">—</p></div>
+    <div class="aar-sec">
+      <div class="aar-t">Financial summary</div>
+      <div class="fin-grid">
+        <div class="fin-card"><div class="lbl">Total spend</div><div class="val" style="color:var(--red)" id="aar-spend">—</div></div>
+        <div class="fin-card"><div class="lbl">Partner savings</div><div class="val" style="color:var(--green)" id="aar-partner">—</div></div>
+        <div class="fin-card"><div class="lbl">Fuel savings</div><div class="val" style="color:var(--green)" id="aar-save">—</div></div>
+        <div class="fin-card"><div class="lbl">Net cost</div><div class="val" style="color:var(--tx)" id="aar-net">—</div></div>
+      </div>
+      <div style="position:relative;height:90px"><canvas id="aar-chart" height="90"></canvas></div>
+    </div>
+    <div class="aar-sec"><div class="aar-t">Partner performance</div><div id="aar-partners"></div></div>
+    <div class="aar-sec"><div class="aar-t">Mission log</div><div id="aar-log"></div></div>
+    <div class="aar-sec"><div class="aar-t">Competitive outcome</div><div id="end-details"></div></div>
+    <div class="aar-sec" style="background:var(--bg3);border-left:3px solid var(--blue)">
+      <div class="aar-t" style="color:var(--tx3)">Key logistics lessons</div>
+      <div id="aar-lessons" style="font-size:11px;color:var(--tx2);line-height:1.6"></div>
+    </div>
+    <button class="cta" onclick="location.reload()">Play again</button>
   </div>
 </div>
 
 <script>
+// ===== PARTNER DATA =====
 const P={
-  spacex:    {name:"SpaceX",     logo:"🚀",color:"#378ADD",cb:"#dbeeff",cc:"#0C447C",base:80, cg:5, rel:0.78,rm:1.00,crew:true, fr:"SpaceX: Raptor abort triggered. Auto-recovery nominal. +{d}d."},
-  boeing:    {name:"Boeing",     logo:"✈", color:"#5F5E5A",cb:"#eceae3",cc:"#2C2C2A",base:145,cg:0, rel:0.93,rm:0.55,crew:true, fr:"Boeing: SLS processing delay. +{d}d hold, +${c}M."},
-  blueorigin:{name:"Blue Origin",logo:"🌐",color:"#1D9E75",cb:"#d5f5eb",cc:"#085041",base:105,cg:2, rel:0.72,rm:1.35,crew:false,fr:"Blue Origin: New Glenn guidance fault. Correction burn. +{d}d."},
+  spacex:    {name:"SpaceX",     logo:"🚀",color:"#378ADD",cb:"#dbeeff",cc:"#0C447C",base:80, cg:5,rel:0.78,rm:1.00,fr:"SpaceX: Raptor abort. Auto-recovery. +{d}d."},
+  boeing:    {name:"Boeing",     logo:"✈", color:"#5F5E5A",cb:"#eceae3",cc:"#2C2C2A",base:145,cg:0,rel:0.93,rm:0.55,fr:"Boeing: SLS delay. +{d}d, +${c}M."},
+  blueorigin:{name:"Blue Origin",logo:"🌐",color:"#1D9E75",cb:"#d5f5eb",cc:"#085041",base:105,cg:2,rel:0.72,rm:1.35,fr:"Blue Origin: New Glenn anomaly. +{d}d."},
 };
 
+// ===== MOON PHASES =====
 const PH=[
-  {id:"park",    n:"Earth parking orbit",  c:"#378ADD",d:[1,2],  s:0.014,lx:0.02,ly:0.50,la:"right", con:{t:"Inventory staging",       b:"Parking orbit = distribution center hold. Payload staged before main transit begins."}},
-  {id:"tli",     n:"Trans-lunar injection",c:"#EF9F27",d:[3,4],  s:0.013,lx:0.38,ly:0.08,la:"center",con:{t:"Order fulfillment timing", b:"TLI = pick-and-ship moment. Miss the window and the schedule slips like missing carrier pickup."}},
-  {id:"transit", n:"Outbound transit",     c:"#EF9F27",d:[5,9],  s:0.004,lx:0.50,ly:0.06,la:"center",con:{t:"In-transit visibility",    b:"4-day coast = shipment on the truck. Telemetry mirrors supply chain track-and-trace."}},
-  {id:"lo",      n:"Lunar orbit",          c:"#5DCAA5",d:[10,11],s:0.012,lx:0.94,ly:0.30,la:"left",  con:{t:"Last-mile staging",        b:"Lunar orbit = last-mile depot. Final configuration before surface delivery."}},
-  {id:"land",    n:"Lunar landing",        c:"#5DCAA5",d:[12,13],s:0.011,lx:0.94,ly:0.46,la:"left",  con:{t:"Point of delivery",        b:"Landing site = customer address. Off-target = a costly return."}},
-  {id:"surface", n:"Surface operations",   c:"#D85A30",d:[14,17],s:0.006,lx:0.94,ly:0.58,la:"left",  con:{t:"On-site value creation",   b:"Science, ISRU, construction. Dwell time where actual value is delivered."}},
-  {id:"ascent",  n:"Lunar ascent",         c:"#D85A30",d:[18,19],s:0.012,lx:0.94,ly:0.68,la:"left",  con:{t:"Reverse logistics",        b:"Crew and samples returning = reverse logistics. Critical to mission economics."}},
-  {id:"return",  n:"Return transit",       c:"#7F77DD",d:[20,24],s:0.004,lx:0.50,ly:0.94,la:"center",con:{t:"Return journey cost",      b:"Return burns ~40% of total fuel. Same asymmetry as commercial returns processing."}},
+  {id:"park",    n:"Earth parking orbit",  c:"#378ADD",d:[1,2],  s:0.014,lx:0.02,ly:0.50,la:"right", con:{t:"Inventory staging",       b:"Parking orbit = distribution center hold. Payload staged before main transit."}},
+  {id:"tli",     n:"Trans-lunar injection",c:"#EF9F27",d:[3,4],  s:0.013,lx:0.37,ly:0.08,la:"center",con:{t:"Order fulfillment timing", b:"TLI = pick-and-ship. Miss the window and the schedule slips like a missed carrier pickup."}},
+  {id:"transit", n:"Outbound transit",     c:"#EF9F27",d:[5,9],  s:0.004,lx:0.50,ly:0.06,la:"center",con:{t:"In-transit visibility",    b:"4-day coast = shipment on the truck. Telemetry = track-and-trace."}},
+  {id:"lo",      n:"Lunar orbit",          c:"#5DCAA5",d:[10,11],s:0.012,lx:0.93,ly:0.30,la:"left",  con:{t:"Last-mile staging",        b:"Lunar orbit = last-mile depot. Final configuration before surface delivery."}},
+  {id:"land",    n:"Lunar landing",        c:"#5DCAA5",d:[12,13],s:0.011,lx:0.93,ly:0.44,la:"left",  con:{t:"Point of delivery",        b:"Landing site = customer address. Off-target = costly return."}},
+  {id:"surface", n:"Surface operations",   c:"#D85A30",d:[14,17],s:0.006,lx:0.93,ly:0.56,la:"left",  con:{t:"On-site value creation",   b:"Dwell time where value is delivered. ISRU here changes the economics permanently."}},
+  {id:"ascent",  n:"Lunar ascent",         c:"#D85A30",d:[18,19],s:0.012,lx:0.93,ly:0.67,la:"left",  con:{t:"Reverse logistics",        b:"Crew and samples returning = reverse logistics. Often overlooked but critical."}},
+  {id:"return",  n:"Return transit",       c:"#7F77DD",d:[20,24],s:0.004,lx:0.50,ly:0.93,la:"center",con:{t:"Return journey cost",      b:"Return burns ~40% of total fuel. Same asymmetry as commercial returns."}},
   {id:"reentry", n:"Re-entry & splashdown",c:"#7F77DD",d:[25,26],s:0.013,lx:0.02,ly:0.64,la:"right", con:{t:"Delivery confirmation",    b:"Splashdown = signed proof of delivery. Post-mission debrief = after-action review."}},
 ];
-
 const IPH=[
-  {id:"park",    n:"Earth parking orbit",  c:"#378ADD",d:[1,2],  s:0.014,lx:0.02,ly:0.50,la:"right", con:{t:"ISRU staging",             b:"Final systems check before irreversible lunar commitment. Risk-reduction buffer."}},
-  {id:"tli",     n:"Trans-lunar injection",c:"#EF9F27",d:[3,4],  s:0.013,lx:0.38,ly:0.08,la:"center",con:{t:"Capital equipment transit", b:"Shipping ISRU = shipping a factory. Fixed CapEx amortized over future mission savings."}},
-  {id:"transit", n:"Outbound transit",     c:"#EF9F27",d:[5,9],  s:0.004,lx:0.50,ly:0.06,la:"center",con:{t:"Supply chain investment",   b:"Every dollar getting ISRU to Moon is fixed cost. Break-even depends on mission volume."}},
-  {id:"lo",      n:"Lunar orbit",          c:"#5DCAA5",d:[10,11],s:0.012,lx:0.94,ly:0.30,la:"left",  con:{t:"Site selection",            b:"South Pole: confirmed water ice. Location = durable competitive advantage."}},
-  {id:"land",    n:"ISRU deployment",      c:"#1D9E75",d:[12,14],s:0.008,lx:0.94,ly:0.46,la:"left",  con:{t:"Factory installation",      b:"Drill rigs, electrolysis cells, cryo tanks. Production facility at the delivery site."}},
-  {id:"surface", n:"Ice extraction begins",c:"#1D9E75",d:[15,18],s:0.005,lx:0.94,ly:0.58,la:"left",  con:{t:"Make vs Buy: activated",    b:"H2O ice → LH2 + LOX. You now manufacture your own propellant. Vertical integration complete."}},
-  {id:"ascent",  n:"Lunar ascent",         c:"#D85A30",d:[19,20],s:0.012,lx:0.94,ly:0.68,la:"left",  con:{t:"First Moon-fueled return",  b:"Stockpile > 20t: ascent uses lunar fuel. Cost curve just shifted downward."}},
-  {id:"return",  n:"Return transit",       c:"#7F77DD",d:[21,25],s:0.004,lx:0.50,ly:0.94,la:"center",con:{t:"Cost curve inflection",     b:"Earth fuel cost stays flat. Moon fuel cost falls each mission. Watch the chart."}},
+  {id:"park",    n:"Earth parking orbit",  c:"#378ADD",d:[1,2],  s:0.014,lx:0.02,ly:0.50,la:"right", con:{t:"ISRU staging",             b:"Final check before irreversible lunar commitment. Risk-reduction buffer."}},
+  {id:"tli",     n:"Trans-lunar injection",c:"#EF9F27",d:[3,4],  s:0.013,lx:0.37,ly:0.08,la:"center",con:{t:"Capital equipment transit", b:"Shipping ISRU = shipping a factory. CapEx amortized over future missions."}},
+  {id:"transit", n:"Outbound transit",     c:"#EF9F27",d:[5,9],  s:0.004,lx:0.50,ly:0.06,la:"center",con:{t:"Supply chain investment",   b:"Fixed cost getting ISRU to Moon. Break-even depends on mission volume."}},
+  {id:"lo",      n:"Lunar orbit",          c:"#5DCAA5",d:[10,11],s:0.012,lx:0.93,ly:0.30,la:"left",  con:{t:"Site selection logistics",  b:"South Pole: confirmed water ice. Location = durable competitive advantage."}},
+  {id:"land",    n:"ISRU deployment",      c:"#1D9E75",d:[12,14],s:0.008,lx:0.93,ly:0.44,la:"left",  con:{t:"Factory installation",      b:"Drill rigs, electrolysis cells, cryo tanks. Production facility on-site."}},
+  {id:"surface", n:"Ice extraction begins",c:"#1D9E75",d:[15,18],s:0.005,lx:0.93,ly:0.56,la:"left",  con:{t:"Make vs Buy: activated",    b:"H₂O ice → LH₂ + LOX. You now manufacture your own propellant on-site."}},
+  {id:"ascent",  n:"Lunar ascent",         c:"#D85A30",d:[19,20],s:0.012,lx:0.93,ly:0.67,la:"left",  con:{t:"First Moon-fueled return",  b:"Stockpile > 20t: ascent uses lunar fuel. Cost curve just shifted downward."}},
+  {id:"return",  n:"Return transit",       c:"#7F77DD",d:[21,25],s:0.004,lx:0.50,ly:0.93,la:"center",con:{t:"Cost curve inflection",     b:"Earth fuel flat. Moon fuel cost falls each mission. Watch the chart."}},
   {id:"reentry", n:"Re-entry & splashdown",c:"#7F77DD",d:[26,27],s:0.013,lx:0.02,ly:0.64,la:"right", con:{t:"Break-even analysis",       b:"~5 ISRU missions to beat Earth fuel cost. Classic vertical integration payoff."}},
 ];
+// Venus HAVOC phases
+const VPH=[
+  {id:"vpark",   n:"Earth departure orbit",   c:"#C8660A",d:[1,3],  s:0.010,lx:0.02,ly:0.50,la:"right", con:{t:"Ultra-long supply chain",   b:"Venus transit = 6 months. No return for hardware. Every kg costs 10× more than Moon logistics."}},
+  {id:"vtransit",n:"Venus transit (6 months)",c:"#C8660A",d:[4,22], s:0.002,lx:0.50,ly:0.06,la:"center",con:{t:"Interplanetary logistics",    b:"6-month coast to Venus. Communication delay: 3–22 minutes one way. Autonomous decision-making required."}},
+  {id:"ventry",  n:"Atmospheric entry",        c:"#EF9F27",d:[23,24],s:0.016,lx:0.93,ly:0.30,la:"left",  con:{t:"Precision delivery",         b:"Aeroshell entry at 52km altitude. No landing — miss the altitude band and the platform is lost."}},
+  {id:"vdeploy", n:"HAVOC platform deployment",c:"#E8A030",d:[25,26],s:0.014,lx:0.93,ly:0.44,la:"left",  con:{t:"Factory installation",       b:"Inflating aeroshell habitat at 52km. Pressure and temperature are Earth-like here — the logistics sweet spot."}},
+  {id:"vmining", n:"SO₂ & phosphine mining",   c:"#D4160A",d:[27,30],s:0.005,lx:0.93,ly:0.56,la:"left",  con:{t:"Resource extraction",        b:"SO₂ → synthetic fuel feedstock. Phosphine → potential biosignature. Mining the clouds of another world."}},
+  {id:"vreturn", n:"Sample drone return",       c:"#7F77DD",d:[31,36],s:0.002,lx:0.50,ly:0.93,la:"center",con:{t:"Return logistics asymmetry",  b:"Only samples return — the platform stays. Disposable supply chain infrastructure. Capital, not operating expense."}},
+  {id:"vreentry",n:"Earth re-entry",            c:"#7F77DD",d:[37,38],s:0.013,lx:0.02,ly:0.64,la:"right", con:{t:"Mission closure",            b:"Sample analysis confirms SO₂ yield and phosphine concentration. Aphrodite Station operational."}},
+];
 
+// ===== RISKS =====
 const SR=[
-  {id:"flare",  ph:["transit","return"],type:"danger",p:[0,0.006,0.012],d:2,c:18,ic:"Solar flare",   m:"Radiation storm — sheltering. +{d}d, +${c}M.",   l:"Force majeure: safety stock buffer critical."},
-  {id:"micro",  ph:["transit","lo"],   type:"warn",  p:[0,0.005,0.010],d:1,c:8, ic:"Micrometeorite",m:"Hull impact — inspection hold. +{d}d, +${c}M.",   l:"Quality hold: mirrors receiving dock inspection."},
-  {id:"comms",  ph:["transit"],        type:"warn",  p:[0,0.004,0.009],d:1,c:5, ic:"Comms blackout",m:"Signal lost 18hrs. Autonomous mode. +{d}d.",       l:"Visibility gap: shipment goes dark in transit."},
-  {id:"weather",ph:["land"],           type:"warn",  p:[0,0.007,0.014],d:2,c:10,ic:"Dust storm",    m:"Regolith storm — abort + reschedule. +{d}d.",     l:"Last-mile weather closure: rerouting required."},
-  {id:"fuel",   ph:["tli","ascent"],   type:"danger",p:[0,0.004,0.008],d:0,c:22,ic:"Fuel anomaly",  m:"Unexpected burn — correction required. +${c}M.",   l:"Expedited surcharge: unplanned fuel = cost overrun."},
+  {id:"flare",  ph:["transit","return"],      type:"danger",p:[0,0.006,0.012],d:2,c:18,ic:"Solar flare",   m:"Radiation storm. +{d}d, +${c}M.",  l:"Force majeure: safety stock critical."},
+  {id:"micro",  ph:["transit","lo"],          type:"warn",  p:[0,0.005,0.010],d:1,c:8, ic:"Micrometeorite",m:"Hull impact. +{d}d, +${c}M.",       l:"Quality hold: mirrors dock inspection."},
+  {id:"comms",  ph:["transit"],               type:"warn",  p:[0,0.004,0.009],d:1,c:5, ic:"Comms blackout",m:"Signal lost 18hrs. +{d}d.",          l:"Visibility gap: shipment goes dark."},
+  {id:"weather",ph:["land"],                  type:"warn",  p:[0,0.007,0.014],d:2,c:10,ic:"Dust storm",    m:"Regolith storm — abort. +{d}d.",    l:"Last-mile weather closure."},
+  {id:"fuel",   ph:["tli","ascent"],          type:"danger",p:[0,0.004,0.008],d:0,c:22,ic:"Fuel anomaly",  m:"Correction burn. +${c}M.",           l:"Expedited surcharge: unplanned fuel."},
 ];
 const IR=[
-  {id:"freeze",  ph:["surface","land"],type:"danger",p:[0,0.007,0.014],d:2,c:15,ic:"Equipment freeze",m:"Drill frozen -230C. Repair needed. +{d}d, +${c}M.",l:"Factory downtime: preventive maintenance ROI."},
-  {id:"regolith",ph:["surface"],      type:"warn",  p:[0,0.006,0.012],d:1,c:8, ic:"Regolith jam",   m:"Separator jammed. +{d}d hold.",                   l:"Input quality: raw material variability hits throughput."},
-  {id:"cryo",    ph:["surface"],      type:"warn",  p:[0,0.005,0.009],d:0,c:10,ic:"Cryo leak",      m:"LH2 boil-off. Stockpile -8t.",                    l:"Inventory shrinkage: cold chain spoilage."},
-  {id:"power",   ph:["surface"],      type:"danger",p:[0,0.004,0.008],d:1,c:12,ic:"Power fault",    m:"Solar array hit. Electrolysis paused. +{d}d.",     l:"Utility disruption: power outage stops production."},
+  {id:"freeze",  ph:["surface","land"],       type:"danger",p:[0,0.007,0.014],d:2,c:15,ic:"Equipment freeze",m:"Drill frozen. +{d}d, +${c}M.", l:"Factory downtime: maintenance ROI."},
+  {id:"regolith",ph:["surface"],              type:"warn",  p:[0,0.006,0.012],d:1,c:8, ic:"Regolith jam",   m:"Separator jammed. +{d}d.",       l:"Input quality: raw material variability."},
+  {id:"cryo",    ph:["surface"],              type:"warn",  p:[0,0.005,0.009],d:0,c:10,ic:"Cryo leak",      m:"LH2 boil-off. Stockpile -8t.",   l:"Cold chain spoilage."},
+  {id:"power",   ph:["surface"],              type:"danger",p:[0,0.004,0.008],d:1,c:12,ic:"Power fault",    m:"Electrolysis paused. +{d}d.",    l:"Utility disruption: production stops."},
 ];
+const VR=[
+  {id:"acid",    ph:["vmining","vdeploy"],    type:"danger",p:[0,0.008,0.015],d:3,c:25,ic:"Acid corrosion", m:"H₂SO₄ degraded platform membrane. Emergency seal. +{d}d, +${c}M.",l:"Material durability: sulfuric acid attacks supply chain infrastructure."},
+  {id:"drift",   ph:["vmining","vtransit"],   type:"warn",  p:[0,0.006,0.012],d:2,c:14,ic:"Altitude drift", m:"Platform drifted below safe zone. Propulsive correction. +{d}d.",   l:"Last-mile precision: altitude = the delivery address. Drift = off-target."},
+  {id:"commsV",  ph:["vtransit","vmining"],   type:"warn",  p:[0,0.005,0.010],d:0,c:8, ic:"Comm delay",    m:"22-min signal lag caused guidance error. Course corrected. +${c}M.",l:"Visibility gap: 22-minute light delay makes real-time supply chain impossible."},
+  {id:"pressure",ph:["ventry","vdeploy"],     type:"danger",p:[0,0.007,0.013],d:2,c:20,ic:"Pressure fault",m:"Habitat inflation 12% off. Structural hold. +{d}d, +${c}M.",         l:"QC at delivery: infrastructure that can't be inspected until it's deployed."},
+  {id:"yield",   ph:["vmining"],              type:"warn",  p:[0,0.006,0.011],d:0,c:5, ic:"Low SO₂ yield",  m:"Sulfur concentration below model. Harvest -25%.",                  l:"Upstream supply variance: raw material quality unpredictable in new environments."},
+];
+const CHINA_PHASES=["Launching Chang'e 7...","In transit to Moon...","Entering lunar orbit...","Surface deployment...","Establishing base...","ISRU hardware delivery...","Ice extraction begun!","Lunar fuel production!","Preparing Venus mission..."];
+const CD_STATUSES=["Fueling complete","Range safety confirmed","Crew ingress complete","Flight computer armed","Guidance internal","Range clear","Go for main engine start","Ignition sequence start","All engines nominal","LIFTOFF!"];
 
-let G={run:false,mt:"supply",sp:null,pmt:null,pi:0,pf:0,trail:[],mc:0,sc:0,
+// ===== GAME STATE =====
+let G={
+  run:false,mt:"supply",pid:null,pi:0,pf:0,trail:[],
+  year:1,missionInYear:0,mc:0,sc:0,totalMissions:0,
   iu:false,id_:false,fuel:0,del:0,spent:0,hist:[],
   uses:{spacex:0,boeing:0,blueorigin:0},rel:{spacex:0,boeing:0,blueorigin:0},
-  fired:new Set(),at:null,ft:null,ff:0,af:null,md:0,ma:0,apid:null};
-
-let ch=null;
+  fired:new Set(),at:null,ft:null,ff:0,af:null,md:0,ma:0,apid:null,
+  sitePenalty:false,icePenalty:false,
+  esaPartner:false,jaxaPartner:false,
+  esaSlots:3,jaxaTotal:0,
+  venusUnlocked:false,venusDeployed:false,venusSO2:0,venusPhosphine:0,
+  diploDecided:false, score:0
+};
+let CN={
+  missionCount:0,phaseIdx:0,phaseFrac:0,trail:[],active:false,
+  isruDeployed:false,fuel:0,siteClaimed:false,score:0,tension:15,
+  ship:{x:0,y:0},phaseName:"Monitoring...",
+  // China advances 1 mission per 1.5 player missions (tied to player mc)
+  targetMissions:0
+};
+let ch=null, introAnim=true, missionLog=[], selectedShipId=null, pendingMT='supply';
 
 const lerp=(a,b,v)=>a+(b-a)*v;
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
 const rnd=n=>Math.round(n);
+const $=id=>document.getElementById(id);
 
-function pcost(pid,mt){return rnd(P[pid].base-Math.min(G.rel[pid]*2,18)+(mt==="isru"?30:0))}
-function pcargo(pid){return Math.min(27,parseInt(document.getElementById('ccargo').value)+P[pid].cg)}
+// ===== CONFIG HELPERS =====
+function getCargo(){return parseInt($('cfg-cargo').value)||14}
+function getCrew(){return parseInt($('cfg-crew').value)||0}
+function getRisk(){return parseInt($('cfg-risk').value)||2}
+
+function pcost(pid,mt){
+  const c=getCargo(),cr=getCrew(),rs=G.rel[pid];
+  const sitePen=G.sitePenalty&&mt!=="isru"?25:0;
+  const isruPrem=mt==="isru"?30:0;
+  const jaxaDisc=G.jaxaPartner&&mt==="supply"?15:0;
+  const relDisc=Math.min(rs*2,18);
+  const cargoExtra=rnd((c-14)*0.5);
+  const crewExtra=cr*8;
+  return rnd(P[pid].base-relDisc+isruPrem+sitePen+cargoExtra+crewExtra-jaxaDisc);
+}
 function prel(pid){return clamp(P[pid].rel+G.rel[pid]*0.02,0,0.99)}
-function prm(pid){return P[pid].rm*Math.max(0,1-G.rel[pid]*0.06)}
-function mfd(){return G.id_?rnd(clamp(G.fuel/100,0,1)*0.42*120):0}
+function prm(pid){
+  const jaxaMod=G.jaxaPartner&&G.id_?0.8:1;
+  return P[pid].rm*Math.max(0,1-G.rel[pid]*0.06)*(1+CN.tension/400)*jaxaMod;
+}
+function mfd(){return G.id_?rnd(clamp(G.fuel/100,0,1)*0.42*120*(G.icePenalty?0.6:1)*(G.esaPartner?0.7:1)):0}
 
-function onCfg(){
-  document.getElementById('vcargo').textContent=document.getElementById('ccargo').value;
-  document.getElementById('vcrew').textContent=document.getElementById('ccrew').value;
-  document.getElementById('vrisk').textContent=['Low','Med','High'][parseInt(document.getElementById('crisk').value)-1];
-  document.getElementById('cprompt').textContent='Config updated — hit a mission button to see fresh bids.';
+// ===== INTRO =====
+function drawIntroCanvas(){
+  const cv=$('intro-canvas');if(!cv||!introAnim)return;
+  const W=cv.offsetWidth||480,H=140,dpr=devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  const Ex=W*0.15,Ey=H*0.52,Er=14,Mx=W*0.80,My=H*0.52,Mr=10;
+  const Vx=W*0.5,Vy=H*0.15,Vr=9; // Venus
+  const cxm=(Ex+Mx)/2;
+  // Stars
+  ctx.fillStyle="rgba(255,255,255,0.28)";
+  for(let i=0;i<28;i++){ctx.beginPath();ctx.arc((i*137.5%1)*W,(i*97.3%1)*H,0.5,0,Math.PI*2);ctx.fill();}
+  // Venus
+  ctx.fillStyle="#C8660A";ctx.beginPath();ctx.arc(Vx,Vy,Vr,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="rgba(255,200,80,0.3)";ctx.beginPath();ctx.arc(Vx,Vy,Vr*1.4,0,Math.PI*2);ctx.fill();
+  // Ghost arcs
+  ctx.strokeStyle="rgba(55,138,221,0.18)";ctx.setLineDash([3,5]);ctx.lineWidth=0.7;
+  ctx.beginPath();for(let i=0;i<=50;i++){const f=i/50,cpx=cxm,cpy=Ey-H*0.36;const x=lerp(lerp(Ex,cpx,f),lerp(cpx,Mx,f),f),y=lerp(lerp(Ey,cpy,f),lerp(cpy,My,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  ctx.strokeStyle="rgba(212,22,10,0.15)";
+  ctx.beginPath();for(let i=0;i<=50;i++){const f=i/50,cpx=cxm,cpy=Ey-H*0.22;const x=lerp(lerp(Ex,cpx,f),lerp(cpx,Mx,f),f),y=lerp(lerp(Ey,cpy,f),lerp(cpy,My,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  // Venus arc (dashed orange)
+  ctx.strokeStyle="rgba(200,102,10,0.25)";
+  ctx.beginPath();ctx.moveTo(Ex,Ey);ctx.quadraticCurveTo(W*0.3,Vy,Vx,Vy);ctx.stroke();
+  ctx.setLineDash([]);
+  // Earth
+  ctx.fillStyle="#378ADD";ctx.beginPath();ctx.arc(Ex,Ey,Er,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.18)";ctx.beginPath();ctx.arc(Ex-Er*.2,Ey-Er*.25,Er*.3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#2C6E4E";ctx.beginPath();ctx.arc(Ex+Er*.14,Ey+Er*.07,Er*.2,0,Math.PI*2);ctx.fill();
+  // Moon
+  ctx.fillStyle="#B4B2A9";ctx.beginPath();ctx.arc(Mx,My,Mr,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#888780";ctx.beginPath();ctx.arc(Mx-Mr*.18,My-Mr*.14,Mr*.14,0,Math.PI*2);ctx.fill();
+  // Ships
+  const t=Date.now()/2800,ut=t%1,ct=(t+0.28)%1;
+  const cpxu=(Ex+Mx)/2,cpyu=Ey-H*0.36;
+  const ux=lerp(lerp(Ex,cpxu,ut),lerp(cpxu,Mx,ut),ut),uy=lerp(lerp(Ey,cpyu,ut),lerp(cpyu,My,ut),ut);
+  ctx.save();ctx.translate(ux,uy);ctx.fillStyle="#378ADD";ctx.beginPath();ctx.moveTo(0,-4);ctx.lineTo(3,2.5);ctx.lineTo(0,1.2);ctx.lineTo(-3,2.5);ctx.closePath();ctx.fill();ctx.restore();
+  const cpxc=(Ex+Mx)/2,cpyc=Ey-H*0.22;
+  const cx2=lerp(lerp(Ex,cpxc,ct),lerp(cpxc,Mx,ct),ct),cy2=lerp(lerp(Ey,cpyc,ct),lerp(cpyc,My,ct),ct);
+  ctx.save();ctx.translate(cx2,cy2);ctx.fillStyle="#D4160A";ctx.beginPath();ctx.moveTo(0,-4);ctx.lineTo(3,2.5);ctx.lineTo(0,1.2);ctx.lineTo(-3,2.5);ctx.closePath();ctx.fill();ctx.restore();
+  // Venus ship (slower, orange)
+  const vt=(t*0.35)%1;
+  const vcpx=W*0.3,vcpy=Vy;
+  const vx2=lerp(lerp(Ex,vcpx,vt),lerp(vcpx,Vx,vt),vt),vy2=lerp(lerp(Ey,vcpy,vt),lerp(vcpy,Vy,vt),vt);
+  ctx.save();ctx.translate(vx2,vy2);ctx.fillStyle="#C8660A";ctx.beginPath();ctx.moveTo(0,-4);ctx.lineTo(3,2.5);ctx.lineTo(0,1.2);ctx.lineTo(-3,2.5);ctx.closePath();ctx.fill();ctx.restore();
+  ctx.font="500 8px -apple-system,sans-serif";ctx.textAlign="center";ctx.fillStyle="rgba(255,255,255,0.5)";
+  ctx.fillText("EARTH",Ex,Ey+Er+8);ctx.fillText("MOON",Mx,My+Mr+8);ctx.fillText("VENUS",Vx,Vy+Vr+8);
+  requestAnimationFrame(drawIntroCanvas);
 }
 
-function buildCards(mt){
-  const crew=parseInt(document.getElementById('ccrew').value);
+function goToConfig(){
+  introAnim=false;
+  $('intro').classList.add('hidden');
+  $('cfgscreen').classList.remove('hidden');
+  updateConfigScreen();
+}
+
+// ===== CONFIG SCREEN =====
+let selMT='supply';
+function selectMissionType(t){
+  if(t==='isru'&&G.sc<3)return;
+  if(t==='venus'&&!G.venusUnlocked)return;
+  selMT=t;
+  document.querySelectorAll('.mission-btn').forEach(b=>b.classList.remove('selected'));
+  const el=$('mtype-'+t);if(el)el.classList.add('selected');
+  updateConfigScreen();
+}
+function updateConfigScreen(){
+  const cargo=getCargo(),crew=getCrew(),risk=getRisk();
+  const rl=['Low','Medium','High'];
+  const rd=['Conservative — few disruptions. Protects schedule at higher cost.','Balanced — some disruptions likely. Moderate risk-cost tradeoff.','Aggressive — frequent events. High variance, tests partner reliability.'];
+  $('vcargo').textContent=cargo+'t';
+  $('vcrew').textContent=crew;
+  $('vrisk').textContent=rl[risk-1];
+  $('risk-desc').textContent=rd[risk-1];
+  const yr=G.year,miy=G.missionInYear+1;
+  $('year-display').textContent='Year '+yr;
+  $('year-sub').textContent='Mission '+miy+' of 2 this year'+(yr>=7?' — Venus era':'');
+  $('cfg-mission-note')?$('cfg-mission-note').textContent='':null;
+  // Coalition flags
+  let flags='🇺🇸';
+  if(G.esaPartner)flags+=' 🇪🇺';
+  if(G.jaxaPartner)flags+=' 🇯🇵';
+  $('coalition-flags').textContent=flags;
+  // Year banner color for Venus
+  const banner=$('year-banner');
+  banner.style.background=yr>=7?'linear-gradient(135deg,#2a0800 0%,#6b2000 100%)':'linear-gradient(135deg,#0a1628 0%,#1a2a4a 100%)';
+  // Mission type buttons
+  const isruOk=G.sc>=3,venusOk=G.venusUnlocked;
+  $('mission-type-btns').innerHTML=`
+    <div class="mission-btn${selMT==='supply'?' selected':''}" id="mtype-supply" onclick="selectMissionType('supply')">
+      <h3>🚀 Supply mission</h3><p>Deliver cargo, crew and equipment to the lunar base.</p>
+      <span class="req ok">Available</span>
+    </div>
+    <div class="mission-btn${selMT==='isru'?' selected':''}" id="mtype-isru" onclick="selectMissionType('isru')" style="${isruOk?'':'opacity:.6'}">
+      <h3>⛏ ISRU mission</h3><p>Deploy ice-mining hardware to the south pole.</p>
+      <span class="req ${isruOk?'ok':'locked'}">${isruOk?'Available':'Need '+(3-G.sc)+' more supply'}</span>
+    </div>
+    ${venusOk?`<div class="mission-btn venus-mode${selMT==='venus'?' selected':''}" id="mtype-venus" onclick="selectMissionType('venus')">
+      <h3>♀ Venus HAVOC</h3><p>Deploy aeroshell platform at 52km altitude. Mine SO₂ and phosphine.</p>
+      <span class="req venus-ok">Unlocked — Year 7</span>
+    </div>`:''}
+  `;
+  // Impact table
   const ids=Object.keys(P);
-  const cheap=ids.reduce((a,b)=>pcost(a,mt)<pcost(b,mt)?a:b);
-  const reliable=ids.reduce((a,b)=>prel(a)>prel(b)?a:b);
-  document.getElementById('pcards').innerHTML=ids.map(pid=>{
-    const p=P[pid],cost=pcost(pid,mt),cargo=pcargo(pid),rel=rnd(prel(pid)*100),rm=rnd(prm(pid)*100),rs=G.rel[pid];
-    const blocked=crew>0&&!p.crew;
-    return`<div class="pcard${pid===cheap?' cheap':''}${pid===reliable?' best':''}" id="pc-${pid}" onclick="selP('${pid}')">
-      <div class="plogo">${p.logo}</div>
-      <div class="pname">${p.name}</div>
-      <div class="pst"><span>Cost</span><span>$${cost}M</span></div>
-      <div class="pst"><span>Cargo cap</span><span>${cargo}t</span></div>
-      <div class="pst"><span>Reliability</span><span>${rel}%</span></div>
-      <div class="prb"><div class="prf" style="width:${rel}%;background:${p.color}"></div></div>
-      <div class="pst" style="margin-top:3px"><span>Risk mod</span><span style="color:${rm>100?'#A32D2D':rm<80?'#3B6D11':'#BA7517'}">${rm}%</span></div>
-      <div class="pst"><span>Relationship</span><span style="color:${rs>3?'#3B6D11':'var(--tx2)'}">Lv ${rs}</span></div>
-      ${blocked?`<div style="font-size:9px;color:#A32D2D;margin-top:3px;font-weight:500">Not crew-rated — set crew to 0</div>`:''}
-      ${rs>0?`<div style="font-size:9px;color:#3B6D11;margin-top:2px">-$${Math.min(rs*2,18)}M loyalty discount</div>`:''}
+  $('cfg-impact').innerHTML=ids.map(pid=>{
+    const p=P[pid],cost=pcost(pid,selMT),cap=Math.min(30,cargo+p.cg);
+    const rel=rnd(prel(pid)*100),rm=rnd(prm(pid)*100),rs=G.rel[pid];
+    const jd=G.jaxaPartner&&selMT==='supply'?` <span style="color:var(--green);font-size:9px">-$15M JAXA</span>`:'';
+    return`<div class="impact-row" style="border-color:${p.color}">
+      <span style="font-size:15px">${p.logo}</span>
+      <div style="flex:1;font-size:10px">
+        <div style="font-weight:500;color:var(--tx);margin-bottom:2px">${p.name}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;color:var(--tx2)">
+          <span>Cost: <b style="color:${cost>120?'var(--red)':cost<90?'var(--green)':'var(--amber)'}">$${cost}M${jd}</b></span>
+          <span>Cargo: <b>${cap}t${cap<cargo?` <span style="color:var(--red)">(short ${cargo-cap}t)</span>`:''}</b></span>
+          <span>Rel: <b style="color:${rel>88?'var(--green)':rel<75?'var(--red)':'var(--amber)'}">${rel}%</b></span>
+          <span>Risk: <b style="color:${rm>110?'var(--red)':rm<70?'var(--green)':'var(--amber)'}">${rm}%</b></span>
+          <span>Lv: <b style="color:${rs>3?'var(--green)':'var(--tx2)'}">${rs}</b></span>
+        </div>
+      </div>
     </div>`;
   }).join('');
-  document.getElementById('bconfirm').disabled=true;
-  G.sp=null;
-  const concepts={
-    supply:`<strong>Spot buying vs. preferred supplier:</strong> Choosing a new provider each mission = spot buying (max flexibility, no relationship value). Staying loyal = preferred supplier (discounts, priority, trust). Neither always wins — it depends on volume, risk tolerance, and switching costs.`,
-    isru:`<strong>Critical supplier for capital equipment:</strong> ISRU is a one-way, high-stakes shipment. Reliability beats cost here — a failed delivery requires a full resupply mission. Single-source procurement for mission-critical hardware.`
-  };
-  document.getElementById('mconcept').innerHTML=concepts[mt]||concepts.supply;
+}
+function onCfgChange(){updateConfigScreen();}
+function goToShipSelect(){
+  pendingMT=selMT;
+  $('cfgscreen').classList.add('hidden');
+  $('shipselect').classList.remove('hidden');
+  buildShipCards();
 }
 
-function selP(pid){
-  const crew=parseInt(document.getElementById('ccrew').value);
-  if(crew>0&&!P[pid].crew){
-    document.getElementById('msub').textContent='Blue Origin is uncrewed. Set crew to 0 to use them, or choose another provider.';
-    return;
+// ===== SHIP SELECT =====
+function buildShipCards(){
+  const mt=pendingMT;
+  const ids=Object.keys(P);
+  const cheapest=ids.reduce((a,b)=>pcost(a,mt)<pcost(b,mt)?a:b);
+  const reliable=ids.reduce((a,b)=>prel(a)>prel(b)?a:b);
+  const warn=G.sitePenalty&&mt==="supply"?'⚠ Site penalty +$25M. ':'';
+  const cn=CN.isruDeployed&&!G.id_?' China ISRU ahead — pick reliably!':'';
+  $('ship-summary').textContent=`${mt==='venus'?'Venus HAVOC':mt==='isru'?'ISRU deployment':'Supply mission'} · ${getCargo()}t · ${getCrew()} crew · Risk ${['Low','Med','High'][getRisk()-1]}${G.jaxaPartner?' · JAXA -$15M':''}${warn}${cn}`;
+  $('ships-grid').innerHTML=ids.map(pid=>{
+    const p=P[pid],cost=pcost(pid,mt),cap=Math.min(30,getCargo()+p.cg);
+    const rel=rnd(prel(pid)*100),rm=rnd(prm(pid)*100),rs=G.rel[pid];
+    const isSel=pid===selectedShipId;
+    return`<div class="ship-card${pid===cheapest?' ':''}${pid===reliable?' recommended':''} ${isSel?'selected':''}" id="sc-${pid}" onclick="selShip('${pid}')">
+      <div class="ship-svg-wrap">${rktSVG(pid)}</div>
+      <div class="ship-name">${p.logo} ${p.name}</div>
+      <div class="ship-vehicle">${pid==='spacex'?'Starship':pid==='boeing'?'SLS/Orion':'New Glenn'}</div>
+      <div class="ship-stats">
+        <div class="ship-stat"><span class="lbl">Cost</span><span class="val" style="color:${cost>120?'#A32D2D':cost<90?'#3B6D11':'#BA7517'}">$${cost}M</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${rnd(cost/160*100)}%;background:${cost>120?'#A32D2D':cost<90?'#3B6D11':'#BA7517'}"></div></div>
+        <div class="ship-stat"><span class="lbl">Cargo</span><span class="val">${cap}t${cap<getCargo()?` <span style="color:#A32D2D;font-size:9px">⚠ short</span>`:''}</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${rnd(cap/30*100)}%;background:#378ADD"></div></div>
+        <div class="ship-stat"><span class="lbl">Crew</span><span class="val">0–4 ✓</span></div>
+        <div class="ship-stat"><span class="lbl">Reliability</span><span class="val" style="color:${rel>88?'#3B6D11':rel<75?'#A32D2D':'#BA7517'}">${rel}%</span></div>
+        <div class="bar-wrap"><div class="bar-fill" style="width:${rel}%;background:${p.color}"></div></div>
+        <div class="ship-stat"><span class="lbl">Risk mod</span><span class="val" style="color:${rm>110?'#A32D2D':rm<70?'#3B6D11':'#BA7517'}">${rm}%</span></div>
+        <div class="ship-stat"><span class="lbl">Relationship</span><span class="val" style="color:${rs>3?'#3B6D11':'var(--tx2)'}">Lv ${rs}${rs>0?` (-$${Math.min(rs*2,18)}M)`:''}</span></div>
+      </div>
+      <div class="ship-tradeoff">${tradeoff(pid)}</div>
+    </div>`;
+  }).join('');
+  $('ship-confirm').disabled=!selectedShipId;
+  $('ship-note').textContent=selectedShipId?`Selected: ${P[selectedShipId].logo} ${P[selectedShipId].name} — tap confirm`:'Select a vehicle above';
+}
+function tradeoff(pid){
+  const t={
+    spacex:`<strong>Best for:</strong> High cargo, low cost. Risk drops fast with relationship. Build loyalty early.<br><strong>Watch:</strong> 100% risk mod until Lv 3+.`,
+    boeing:`<strong>Best for:</strong> Crewed, ISRU, Venus. 55% risk mod is unmatched. Most reliable for one-way missions.<br><strong>Watch:</strong> Highest base cost — fewer missions per dollar.`,
+    blueorigin:`<strong>Best for:</strong> Aggressive cargo runs. 2t bonus. Risk drops sharply with loyalty.<br><strong>Watch:</strong> 135% risk mod early — high variance until Lv 3+.`
+  };return t[pid]||'';
+}
+function rktSVG(pid){
+  if(pid==='spacex')return`<svg width="54" height="100" viewBox="0 0 54 100" class="rf-anim" style="animation-delay:0s">
+    <ellipse cx="27" cy="94" rx="6" ry="3.5" fill="#EF9F27" opacity="0.55" class="ex"/>
+    <ellipse cx="27" cy="91" rx="8" ry="3" fill="#1a1a1a"/>
+    <rect x="15" y="26" width="24" height="62" rx="6" fill="#C8C8C8"/>
+    <rect x="9" y="55" width="6" height="11" rx="1" fill="#888"/>
+    <rect x="39" y="55" width="6" height="11" rx="1" fill="#888"/>
+    <path d="M15 26 Q15 7 27 3 Q39 7 39 26Z" fill="#D0D0D0"/>
+    <circle cx="27" cy="19" r="4" fill="#1a3a5c"/>
+    <circle cx="27" cy="19" r="2.7" fill="#2a5a8c"/>
+    <ellipse cx="27" cy="93" rx="7" ry="5" fill="#ff9500" class="fl"/>
+    <ellipse cx="27" cy="95" rx="4.5" ry="3.5" fill="#ffcc00" class="fl" style="animation-delay:.1s"/>
+  </svg>`;
+  if(pid==='boeing')return`<svg width="44" height="100" viewBox="0 0 44 100" class="rf-anim" style="animation-delay:.4s">
+    <ellipse cx="22" cy="97" rx="8" ry="3.5" fill="#EF9F27" opacity="0.45" class="ex"/>
+    <ellipse cx="10" cy="93" rx="4.5" ry="2.5" fill="#1a1a1a"/>
+    <ellipse cx="34" cy="93" rx="4.5" ry="2.5" fill="#1a1a1a"/>
+    <ellipse cx="22" cy="93" rx="4.5" ry="2.5" fill="#1a1a1a"/>
+    <rect x="2" y="42" width="8" height="45" rx="3" fill="#D4500A"/>
+    <rect x="34" y="42" width="8" height="45" rx="3" fill="#D4500A"/>
+    <rect x="13" y="15" width="18" height="76" rx="4" fill="#E8E0D0"/>
+    <rect x="13" y="36" width="18" height="34" rx="2" fill="#D4500A" opacity="0.9"/>
+    <rect x="13" y="50" width="18" height="5" fill="#185FA5"/>
+    <path d="M13 15 L13 8 Q13 2 22 0 Q31 2 31 8 L31 15Z" fill="#C8C0B8"/>
+    <rect x="15" y="4" width="14" height="7" rx="2" fill="#1a3a5c"/>
+    <rect x="20" y="0" width="4" height="6" rx="1" fill="#555"/>
+    <ellipse cx="10" cy="95" rx="4.5" ry="4.5" fill="#ff9500" class="fl"/>
+    <ellipse cx="22" cy="95" rx="4.5" ry="4.5" fill="#ff9500" class="fl" style="animation-delay:.05s"/>
+    <ellipse cx="34" cy="95" rx="4.5" ry="4.5" fill="#ff9500" class="fl" style="animation-delay:.1s"/>
+  </svg>`;
+  return`<svg width="48" height="100" viewBox="0 0 48 100" class="rf-anim" style="animation-delay:.8s">
+    <ellipse cx="24" cy="96" rx="6" ry="3.5" fill="#5DCAA5" opacity="0.5" class="ex"/>
+    <ellipse cx="24" cy="92" rx="8" ry="3" fill="#1a2a1a"/>
+    <rect x="13" y="22" width="22" height="68" rx="8" fill="#1a4a2a"/>
+    <rect x="13" y="49" width="22" height="5" rx="0" fill="#1D9E75" opacity="0.8"/>
+    <path d="M13 22 Q13 4 24 1 Q35 4 35 22Z" fill="#1a4a3a"/>
+    <circle cx="24" cy="15" r="4" fill="#0a2a1a"/>
+    <circle cx="24" cy="15" r="2.7" fill="#1D9E75" opacity="0.6"/>
+    <line x1="13" y1="85" x2="6" y2="96" stroke="#1D9E75" stroke-width="2"/>
+    <line x1="35" y1="85" x2="42" y2="96" stroke="#1D9E75" stroke-width="2"/>
+    <ellipse cx="24" cy="94" rx="7" ry="5" fill="#1D9E75" class="fl" opacity="0.9"/>
+    <ellipse cx="24" cy="96" rx="4.5" ry="3.5" fill="#5DCAA5" class="fl" style="animation-delay:.08s"/>
+  </svg>`;
+}
+function selShip(pid){
+  document.querySelectorAll('.ship-card').forEach(c=>c.classList.remove('selected'));
+  $('sc-'+pid).classList.add('selected');
+  selectedShipId=pid;
+  $('ship-confirm').disabled=false;
+  $('ship-note').textContent=`Selected: ${P[pid].logo} ${P[pid].name} — tap confirm to launch`;
+}
+function confirmShip(){
+  if(!selectedShipId)return;
+  $('shipselect').classList.add('hidden');
+  startCountdown(selectedShipId,pendingMT);
+}
+
+// ===== COUNTDOWN =====
+function startCountdown(pid,mt){
+  const p=P[pid];
+  $('countdown').classList.remove('hidden');
+  $('cd-ship').textContent=p.logo+' '+p.name;
+  $('cd-veh').textContent=pid==='spacex'?'Starship / Falcon Heavy':pid==='boeing'?'SLS Block 1 / Orion':'New Glenn';
+  const sc=$('cd-stars'),sw=innerWidth,sh=innerHeight;
+  sc.width=sw;sc.height=sh;
+  const sctx=sc.getContext('2d');
+  for(let i=0;i<130;i++){sctx.fillStyle=`rgba(255,255,255,${Math.random()*0.55+0.12})`;sctx.beginPath();sctx.arc(Math.random()*sw,Math.random()*sh,Math.random()*1.1+0.3,0,Math.PI*2);sctx.fill();}
+  const bars=$('cd-bars');bars.innerHTML='';
+  for(let i=0;i<10;i++){const b=document.createElement('div');b.className='cd-bar';b.id='cb'+i;b.style.height=(14+i*6)+'px';bars.appendChild(b);}
+  let n=10;
+  const numEl=$('cd-num'),tEl=$('cd-t'),stEl=$('cd-stat');
+  numEl.classList.remove('go');numEl.style.fontSize='108px';numEl.style.color='#ff2222';
+  function tick(){
+    numEl.textContent=n;stEl.textContent=CD_STATUSES[10-n]||'';
+    for(let i=0;i<10;i++){const b=$('cb'+i);if(b)b.className='cd-bar'+(i===(10-n)?' active':i<(10-n)?' done':'');}
+    if(n===0){
+      tEl.style.display='none';numEl.textContent='IGNITION';numEl.classList.add('go');numEl.style.fontSize='48px';numEl.style.color='#1D9E75';
+      stEl.textContent='We have liftoff!';bars.innerHTML='';
+      setTimeout(()=>{numEl.textContent='GO!';setTimeout(()=>launchGame(pid,mt),900);},700);return;
+    }
+    n--;setTimeout(tick,920);
   }
-  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('pc-'+pid).classList.add('sel');
-  G.sp=pid;document.getElementById('bconfirm').disabled=false;
+  tick();
+}
+function launchGame(pid,mt){
+  $('countdown').classList.add('hidden');
+  if(!ch){
+    $('game').style.display='block';
+    $('vehicle-badge').textContent='Vehicle: '+P[pid].logo+' '+P[pid].name;
+    initChart();drawMain(null,[],null,null,moonPhases(),null,[]);
+    startChinaAI();
+  }
+  $('next-btn').style.display='none';
+  launch(mt,pid);
 }
 
-function openModal(mt){
-  if(G.run)return;
-  G.pmt=mt;
-  document.getElementById('msub').textContent=`Mission ${G.mc+1} — ${mt==='isru'?'ISRU deployment':'Supply mission'}. Review provider bids.`;
-  buildCards(mt);
-  document.getElementById('bcancel').style.display=G.mc>0?'inline-block':'none';
-  document.getElementById('modal').classList.add('show');
-}
-function closeModal(){document.getElementById('modal').classList.remove('show')}
-function confirmPartner(){if(!G.sp)return;closeModal();launch(G.pmt,G.sp)}
+// ===== CHINA AI =====
+// China advances at ~2/3 player rate, tied to player mission count
+function EP(W,H){return{x:W*0.19,y:H*0.50,r:32}}
+function MP(W,H){return{x:W*0.78,y:H*0.50,r:21}}
+function VP(W,H){return{x:W*0.50,y:H*0.10,r:14}} // Venus position
 
-function launch(mt,pid){
-  G.run=true;G.mt=mt;G.md=0;G.ma=0;G.pi=0;G.pf=0;G.trail=[];G.fired.clear();
-  G.mc++;if(mt==="supply")G.sc++;
-  G.uses[pid]++;G.rel[pid]=Math.min(G.rel[pid]+1,8);G.sp=pid;
-  const p=P[pid],cost=pcost(pid,mt);
-  document.getElementById('bsup').disabled=true;
-  document.getElementById('bisru').disabled=true;
-  document.getElementById('smis').textContent='M'+G.mc;
-  document.getElementById('plogo').textContent=p.logo;
-  document.getElementById('pname').textContent=p.name;
-  document.getElementById('pstats').textContent=`$${cost}M · ${rnd(prel(pid)*100)}% rel · Lv${G.rel[pid]}`;
-  document.getElementById('puses').textContent=G.uses[pid]+'×';
-  G.hist.push(pid);
-  document.getElementById('phist').innerHTML=G.hist.slice(-12).map(id=>`<span class="pc" style="background:${P[id].cb};color:${P[id].cc}">${P[id].name}</span>`).join('');
-  const phases=mt==="isru"?IPH:PH;
-  buildPList(phases);
-  animate(phases,pid,cost);
+function chinaPos(phIdx,frac,W,H){
+  const E=EP(W,H),M=MP(W,H),cx=(E.x+M.x)/2;
+  const prog=clamp((phIdx+frac)/9,0,1);
+  if(prog<0.5){const p=prog*2,cpx=cx,cpy=E.y-H*0.20;return{x:lerp(lerp(E.x,cpx,p),lerp(cpx,M.x,p),p),y:lerp(lerp(E.y,cpy,p),lerp(cpy,M.y,p),p)};}
+  else{const p=(prog-0.5)*2,cpx=cx,cpy=E.y+H*0.20;return{x:lerp(lerp(M.x,cpx,p),lerp(cpx,E.x,p),p),y:lerp(lerp(M.y,cpy,p),lerp(cpy,E.y,p),p)};}
+}
+function startChinaAI(){CN.active=true;CN.phaseName=CHINA_PHASES[0];CN.targetMissions=0;}
+
+// China advances when player advances a frame — but at 2/3 speed
+// We use a counter that ticks every frame, converting to China missions
+let cnFrameAccum=0;
+function advanceChinaFrame(W,H){
+  if(!CN.active)return;
+  // China's speed tied to tension (higher tension = faster China)
+  const speedMod=1+CN.tension/200;
+  cnFrameAccum+=0.002*speedMod;
+  // Advance China phaseFrac
+  CN.phaseFrac+=0.002*speedMod;
+  if(CN.phaseFrac>=1){
+    CN.phaseIdx++;CN.phaseFrac=0;
+    if(CN.phaseIdx>=CHINA_PHASES.length){
+      CN.phaseIdx=0;CN.missionCount++;CN.score+=35+rnd(Math.random()*20);
+      cnFrameAccum=0;
+      // China completes ~1 mission per 1.5 player missions
+      if(CN.missionCount>=2&&!CN.isruDeployed){
+        CN.isruDeployed=true;CN.fuel=30;
+        if(!G.id_){addLog('china-alert','🇨🇳 Chang\'e ISRU first! Ice yield -40%','First-mover advantage: China secured prime ice deposit.');showOv('china-alert','Chang\'e reached ISRU first!');G.icePenalty=true;}
+        else addLog('info','🇨🇳 Chang\'e also deployed ISRU','Competing for same ice deposits now.');
+      }
+      if(CN.missionCount>=1&&!CN.siteClaimed&&!G.id_){CN.siteClaimed=true;addLog('china-alert','🇨🇳 Chang\'e claimed prime site! +$25M/landing','Location strategy: first-mover advantage in site selection.');G.sitePenalty=true;}
+    }
+    CN.phaseName=CHINA_PHASES[Math.min(CN.phaseIdx,CHINA_PHASES.length-1)];
+  }
+  CN.tension=Math.min(95,CN.tension+0.02);
+  const pos=chinaPos(CN.phaseIdx,CN.phaseFrac,W,H);
+  CN.ship={x:pos.x,y:pos.y};
+  CN.trail.push({...pos});
+  if(CN.trail.length>260)CN.trail.shift();
+  if(CN.isruDeployed)CN.fuel=Math.min(120,CN.fuel+0.012);
+  updateChinaUI();
+}
+function updateChinaUI(){
+  const prog=clamp((CN.missionCount*100+CN.phaseIdx*11)/300,0,1);
+  $('china-bar').style.width=(prog*100)+'%';
+  $('china-phase').textContent=CN.phaseName;
+  $('china-score-lbl').textContent=CN.score+' pts';
+  $('cn-ice').textContent=CN.isruDeployed?(G.icePenalty?'Claimed (-40%)':'Shared'):'Open';
+  $('cn-site').textContent=CN.siteClaimed?(G.sitePenalty?'Claimed (+$25M)':'Secondary'):'Open';
+  $('cn-mc').textContent=CN.missionCount;
+  const t=CN.tension,tEl=$('tension-val');
+  $('tension-bar').style.width=t+'%';
+  tEl.textContent=t<30?'Low':t<60?'Moderate':t<80?'High':'Critical';
+  tEl.style.color=t<30?'var(--green)':t<60?'var(--amber)':t<80?'var(--orange)':'var(--red)';
 }
 
+// ===== DIPLOMACY =====
+let diploDecisions={esa:null,jaxa:null};
+function showDiplomacy(){
+  $('game').style.display='none';
+  $('diplomacy').classList.remove('hidden');
+}
+function decideDiplo(agency,choice){
+  diploDecisions[agency]=choice;
+  const resultEl=$(agency+'-result');
+  resultEl.classList.remove('hidden');
+  if(choice==='accept'){
+    resultEl.style.background='#EAF3DE';resultEl.style.color='#3B6D11';
+    if(agency==='esa'){
+      G.esaPartner=true;
+      resultEl.textContent='ESA partnership accepted. Ariane 6 slots active. 35% cost overrun absorption on next 3 missions. 30% of fuel stockpile goes to ESA. Base renamed Artemis-ESA Lunar Gateway.';
+      $('esa-badge').style.display='inline-block';
+      addLog('diplo','🇪🇺 ESA joined coalition','Risk-sharing: ESA absorbs 35% of overruns, gains 30% fuel rights. Vertical integration with a partner.');
+    } else {
+      G.jaxaPartner=true;
+      resultEl.textContent='JAXA partnership accepted. SLIM data shared — ISRU risk modifier -20%. $15M contribution per supply mission. Base gains joint Japanese naming rights.';
+      $('jaxa-badge').style.display='inline-block';
+      addLog('diplo','🇯🇵 JAXA joined coalition','Risk-sharing: JAXA funds $15M/mission, improves ISRU risk profile with south pole data.');
+    }
+  } else {
+    resultEl.style.background='#FAEEDA';resultEl.style.color='#854F0B';
+    resultEl.textContent=agency==='esa'?'ESA declined. They may approach China instead. Fuel production unaffected.':'JAXA declined. No data sharing or cost contribution. They may conduct independent south pole missions.';
+    addLog('info',`${agency.toUpperCase()} proposal declined`,`Solo strategy maintained. ${agency==='esa'?'ESA may align with China.':'JAXA continues independently.'}`);
+  }
+  // Enable continue if both decided
+  if(diploDecisions.esa!==null&&diploDecisions.jaxa!==null)$('diplo-continue').disabled=false;
+}
+function afterDiplo(){
+  $('diplomacy').classList.add('hidden');
+  $('game').style.display='block';
+  G.diploDecided=true;
+  goToNextMission();
+}
+
+// ===== GAME LOGIC =====
+function moonPhases(){return G.mt==="isru"?IPH:G.mt==="venus"?VPH:PH;}
 function showOv(type,text){
-  const el=document.getElementById('ov');
-  el.className='ov show '+type;el.textContent=text;
-  G.ft=type;G.ff=80;
-  if(G.at)clearTimeout(G.at);
+  const el=$('ov');el.className='ov show '+type;el.textContent=text;
+  G.ft=type;G.ff=80;if(G.at)clearTimeout(G.at);
   G.at=setTimeout(()=>{el.classList.remove('show');G.ft=null;},4000);
 }
-
 function addLog(type,msg,log){
-  const f=document.getElementById('rfeed');
-  const ph=f.querySelector('[style*="color:var"]');if(ph)ph.remove();
-  const d=document.createElement('div');
-  d.className='re '+type;
-  d.innerHTML=`<strong>${msg}</strong><br><span style="font-size:9px;opacity:0.85">${log}</span>`;
-  f.insertBefore(d,f.firstChild);
-  while(f.children.length>6)f.removeChild(f.lastChild);
+  const f=$('rfeed');
+  const ph=f.querySelector('[style*="color:var(--tx2)"]');if(ph&&f.children.length>1)ph.remove();
+  const d=document.createElement('div');d.className='re '+type;
+  d.innerHTML=`<strong>${msg}</strong>${log?`<br><span style="font-size:9px;opacity:0.85">${log}</span>`:''}`;
+  f.insertBefore(d,f.firstChild);while(f.children.length>8)f.removeChild(f.lastChild);
 }
-
 function tryRisks(phid,pid){
-  const rl=parseInt(document.getElementById('crisk').value);
-  const rm=prm(pid);
-  const pool=G.mt==="isru"?[...IR,...SR.filter(r=>r.id==="flare")]:SR;
+  const rl=getRisk(),rm=prm(pid);
+  const pool=G.mt==="venus"?VR:G.mt==="isru"?[...IR,...SR.filter(r=>r.id==="flare")]:SR;
   pool.forEach(ev=>{
     if(!ev.ph.includes(phid))return;
-    const key=ev.id+'_'+phid+'_'+G.mc;
-    if(G.fired.has(key))return;
+    const key=ev.id+'_'+phid+'_'+G.mc;if(G.fired.has(key))return;
     if(Math.random()<ev.p[rl-1]*rm){
       G.fired.add(key);
-      const msg=(ev.id==="flare")?P[pid].fr.replace('{d}',ev.d).replace('{c}',ev.c):ev.m.replace('{d}',ev.d).replace('{c}',ev.c);
+      const msg=G.mt==="venus"?ev.m:((ev.id==="flare")?P[pid].fr.replace('{d}',ev.d).replace('{c}',ev.c):ev.m.replace('{d}',ev.d).replace('{c}',ev.c));
       showOv(ev.type,ev.ic+'!');
-      addLog(ev.type,`[${P[pid].name}] ${msg}`,ev.l);
-      G.md+=ev.d;G.ma+=ev.c;G.del+=ev.d;
+      // ESA risk sharing — absorb 35% of cost overrun
+      let costHit=ev.c;
+      if(G.esaPartner&&G.esaSlots>0&&ev.c>0){costHit=rnd(ev.c*0.65);G.esaSlots=Math.max(0,G.esaSlots-1);$('esa-slots').textContent=G.esaSlots;}
+      const logType=G.mt==="venus"?'venus-log':ev.type;
+      addLog(logType,`[${G.mt==='venus'?'HAVOC':P[pid].name}] ${msg}`,ev.l+(G.esaPartner&&ev.c>0?` ESA absorbed $${ev.c-costHit}M.`:''));
+      G.md+=ev.d;G.ma+=costHit;G.del+=ev.d;
       if(ev.id==="cryo"&&G.id_)G.fuel=Math.max(0,G.fuel-8);
-      document.getElementById('sdel').textContent=G.del+'d';
+      if(ev.id==="yield"&&G.venusDeployed)G.venusSO2=Math.max(0,G.venusSO2-5);
+      $('sdel').textContent=G.del+'d';
     }
   });
 }
-
 function buildPList(phases){
-  document.getElementById('plist').innerHTML=phases.map(ph=>`
-    <div class="pi" id="ph-${ph.id}">
-      <span style="width:5px;height:5px;border-radius:50%;background:${ph.c};flex-shrink:0;display:inline-block"></span>
-      <span style="flex:1;font-size:10px;font-weight:500;color:var(--tx)">${ph.n}</span>
-      <span style="font-size:9px;color:var(--tx2)">D${ph.d[0]}–${ph.d[1]}</span>
-    </div>`).join('');
+  $('plist').innerHTML=phases.map(ph=>`<div class="pi" id="ph-${ph.id}">
+    <span style="width:5px;height:5px;border-radius:50%;background:${ph.c};flex-shrink:0;display:inline-block"></span>
+    <span style="flex:1;font-size:10px;font-weight:500;color:var(--tx)">${ph.n}</span>
+    <span style="font-size:9px;color:var(--tx2)">D${ph.d[0]}–${ph.d[1]}</span>
+  </div>`).join('');
 }
-
 function setPhase(id,phases){
   phases.forEach((ph,i)=>{
-    const el=document.getElementById('ph-'+ph.id);if(!el)return;
+    const el=$('ph-'+ph.id);if(!el)return;
     const ai=phases.findIndex(x=>x.id===id);
-    el.classList.toggle('active',ph.id===id);
-    el.classList.toggle('done',i<ai);
+    el.classList.toggle('active',ph.id===id);el.classList.toggle('done',i<ai);
   });
   if(id!==G.apid){
-    G.apid=id;
-    const ph=phases.find(p=>p.id===id);
-    if(ph){document.getElementById('ctit').textContent=ph.con.t;document.getElementById('cbod').textContent=ph.con.b;}
+    G.apid=id;const ph=phases.find(p=>p.id===id);
+    if(ph){$('ctit').textContent=ph.con.t;$('cbod').textContent=ph.con.b;}
   }
 }
 
-function EP(W,H){return{x:W*0.20,y:H*0.50,r:36}}
-function MP(W,H){return{x:W*0.78,y:H*0.50,r:23}}
-
 function tpt(id,f,W,H){
-  const E=EP(W,H),M=MP(W,H),cx=(E.x+M.x)/2;
-  if(id==="park"){const a=Math.PI+f*1.5*Math.PI;return{x:E.x+Math.cos(a)*(E.r+14),y:E.y+Math.sin(a)*(E.r+14)*0.68};}
-  if(id==="tli"||id==="transit"){const pp=id==="tli"?f*0.25:0.25+f*0.55;const cpx=cx,cpy=E.y-H*0.36;return{x:lerp(lerp(E.x,cpx,pp),lerp(cpx,M.x,pp),pp),y:lerp(lerp(E.y,cpy,pp),lerp(cpy,M.y,pp),pp)};}
-  if(id==="lo"){const a=-Math.PI*0.5+f*2*Math.PI;return{x:M.x+Math.cos(a)*(M.r+12),y:M.y+Math.sin(a)*(M.r+12)*0.65};}
-  if(id==="land"||id==="ISRU deployment"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;return{x:lerp(M.x+Math.cos(-1.2)*(M.r+12),lx,f),y:lerp(M.y+Math.sin(-1.2)*(M.r+12)*0.65,ly,f)};}
+  const E=EP(W,H),M=MP(W,H),Vn=VP(W,H),cx=(E.x+M.x)/2;
+  // Moon phases
+  if(id==="park"){const a=Math.PI+f*1.5*Math.PI;return{x:E.x+Math.cos(a)*(E.r+12),y:E.y+Math.sin(a)*(E.r+12)*0.68};}
+  if(id==="tli"||id==="transit"){const pp=id==="tli"?f*0.25:0.25+f*0.55;const cpx=cx,cpy=E.y-H*0.35;return{x:lerp(lerp(E.x,cpx,pp),lerp(cpx,M.x,pp),pp),y:lerp(lerp(E.y,cpy,pp),lerp(cpy,M.y,pp),pp)};}
+  if(id==="lo"){const a=-Math.PI*0.5+f*2*Math.PI;return{x:M.x+Math.cos(a)*(M.r+10),y:M.y+Math.sin(a)*(M.r+10)*0.65};}
+  if(id==="land"||id==="ISRU deployment"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;return{x:lerp(M.x+Math.cos(-1.2)*(M.r+10),lx,f),y:lerp(M.y+Math.sin(-1.2)*(M.r+10)*0.65,ly,f)};}
   if(id==="surface"||id==="Ice extraction begins"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;return{x:lx+Math.sin(f*Math.PI*6)*2.5,y:ly};}
-  if(id==="ascent"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;return{x:lerp(lx,M.x+Math.cos(-0.8)*(M.r+12),f),y:lerp(ly,M.y+Math.sin(-0.8)*(M.r+12)*0.65,f)};}
-  if(id==="return"){const cpx=cx,cpy=E.y+H*0.35;return{x:lerp(lerp(M.x,cpx,f),lerp(cpx,E.x,f),f),y:lerp(lerp(M.y,cpy,f),lerp(cpy,E.y,f),f)};}
-  if(id==="reentry"){const a=f*1.2*Math.PI-0.3;return{x:E.x+Math.cos(a)*(E.r+10),y:E.y+Math.sin(a)*(E.r+10)*0.68};}
-  return{x:E.x,y:E.y};
+  if(id==="ascent"){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;return{x:lerp(lx,M.x+Math.cos(-0.8)*(M.r+10),f),y:lerp(ly,M.y+Math.sin(-0.8)*(M.r+10)*0.65,f)};}
+  if(id==="return"){const cx2=(E.x+M.x)/2,cy=E.y+H*0.33;return{x:lerp(lerp(M.x,cx2,f),lerp(cx2,E.x,f),f),y:lerp(lerp(M.y,cy,f),lerp(cy,E.y,f),f)};}
+  if(id==="reentry"){const a=f*1.2*Math.PI-0.3;return{x:E.x+Math.cos(a)*(E.r+8),y:E.y+Math.sin(a)*(E.r+8)*0.68};}
+  // Venus phases
+  if(id==="vpark"){const a=Math.PI+f*1.5*Math.PI;return{x:E.x+Math.cos(a)*(E.r+12),y:E.y+Math.sin(a)*(E.r+12)*0.68};}
+  if(id==="vtransit"){const cpx=(E.x+Vn.x)/2-W*0.1,cpy=E.y-H*0.1;return{x:lerp(lerp(E.x,cpx,f),lerp(cpx,Vn.x,f),f),y:lerp(lerp(E.y,cpy,f),lerp(cpy,Vn.y,f),f)};}
+  if(id==="ventry"){const a=Math.PI*0.5+f*Math.PI;return{x:Vn.x+Math.cos(a)*(Vn.r+10),y:Vn.y+Math.sin(a)*(Vn.r+10)};}
+  if(id==="vdeploy"){return{x:Vn.x+Math.cos(-0.5+f*0.5)*(Vn.r+8),y:Vn.y+Math.sin(-0.5+f*0.5)*(Vn.r+8)};}
+  if(id==="vmining"){return{x:Vn.x+Math.sin(f*Math.PI*4)*12,y:Vn.y+Math.cos(f*Math.PI*4)*6};}
+  if(id==="vreturn"){const cpx=(Vn.x+E.x)/2+W*0.1,cpy=Vn.y+H*0.2;return{x:lerp(lerp(Vn.x,cpx,f),lerp(cpx,E.x,f),f),y:lerp(lerp(Vn.y,cpy,f),lerp(cpy,E.y,f),f)};}
+  if(id==="vreentry"){const a=f*1.2*Math.PI-0.3;return{x:E.x+Math.cos(a)*(E.r+8),y:E.y+Math.sin(a)*(E.r+8)*0.68};}
+  return E;
 }
 
-function draw(ship,trail,pid,activeId,phases){
-  const cv=document.getElementById('traj');
-  const W=cv.offsetWidth||520,H=390,dpr=window.devicePixelRatio||1;
+function drawMain(ship,trail,pid,activeId,phases,chinaShip,chinaTrail){
+  const cv=$('traj');
+  const W=cv.offsetWidth||480,H=360,dpr=devicePixelRatio||1;
   cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';
   const ctx=cv.getContext('2d');
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,W,H);
-  const E=EP(W,H),M=MP(W,H),cx=(E.x+M.x)/2;
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  const E=EP(W,H),M=MP(W,H),Vn=VP(W,H),cx=(E.x+M.x)/2;
 
   if(G.ft==="danger"){ctx.fillStyle="rgba(162,45,45,0.07)";ctx.fillRect(0,0,W,H);}
   if(G.ft==="warn"){ctx.fillStyle="rgba(186,117,23,0.06)";ctx.fillRect(0,0,W,H);}
   if(G.ft==="success"){ctx.fillStyle="rgba(29,158,117,0.07)";ctx.fillRect(0,0,W,H);}
+  if(G.ft==="china-alert"){ctx.fillStyle="rgba(212,22,10,0.06)";ctx.fillRect(0,0,W,H);}
 
-  ctx.strokeStyle="rgba(55,138,221,0.09)";ctx.setLineDash([3,5]);ctx.lineWidth=0.8;
-  ctx.beginPath();for(let i=0;i<=80;i++){const f=i/80,cpx=cx,cpy=E.y-H*0.36;const x=lerp(lerp(E.x,cpx,f),lerp(cpx,M.x,f),f),y=lerp(lerp(E.y,cpy,f),lerp(cpy,M.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
-  ctx.beginPath();for(let i=0;i<=80;i++){const f=i/80,cpx=cx,cpy=E.y+H*0.35;const x=lerp(lerp(M.x,cpx,f),lerp(cpx,E.x,f),f),y=lerp(lerp(M.y,cpy,f),lerp(cpy,E.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  // Ghost arcs
+  ctx.setLineDash([3,5]);ctx.lineWidth=0.8;
+  ctx.strokeStyle="rgba(55,138,221,0.09)";
+  ctx.beginPath();for(let i=0;i<=80;i++){const f=i/80,cpx=cx,cpy=E.y-H*0.35;const x=lerp(lerp(E.x,cpx,f),lerp(cpx,M.x,f),f),y=lerp(lerp(E.y,cpy,f),lerp(cpy,M.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  ctx.strokeStyle="rgba(212,22,10,0.08)";
+  ctx.beginPath();for(let i=0;i<=80;i++){const f=i/80,cpx=cx,cpy=E.y-H*0.20;const x=lerp(lerp(E.x,cpx,f),lerp(cpx,M.x,f),f),y=lerp(lerp(E.y,cpy,f),lerp(cpy,M.y,f),f);i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+  if(G.venusUnlocked){
+    ctx.strokeStyle="rgba(200,102,10,0.12)";
+    ctx.beginPath();ctx.moveTo(E.x,E.y);const cpx2=(E.x+Vn.x)/2-W*0.1,cpy2=E.y-H*0.1;
+    ctx.quadraticCurveTo(cpx2,cpy2,Vn.x,Vn.y);ctx.stroke();
+  }
   ctx.setLineDash([]);
 
-  if(G.id_){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;ctx.fillStyle="#1D9E75";ctx.fillRect(lx-5,ly-3,10,6);ctx.fillRect(lx-9,ly-1,18,2);ctx.font="bold 7px sans-serif";ctx.textAlign="center";ctx.fillStyle="#0F6E56";ctx.fillText("ISRU",lx,ly+11);}
+  // Venus
+  if(G.venusUnlocked){
+    ctx.fillStyle="#C8660A";ctx.beginPath();ctx.arc(Vn.x,Vn.y,Vn.r,0,Math.PI*2);ctx.fill();
+    // Cloud layers
+    ctx.fillStyle="rgba(255,200,80,0.2)";ctx.beginPath();ctx.arc(Vn.x,Vn.y,Vn.r*1.3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="rgba(255,220,120,0.15)";ctx.beginPath();ctx.arc(Vn.x,Vn.y,Vn.r*1.6,0,Math.PI*2);ctx.fill();
+    ctx.font="500 8px -apple-system,sans-serif";ctx.textAlign="center";ctx.fillStyle="#C8660A";
+    ctx.fillText("VENUS",Vn.x,Vn.y+Vn.r+10);
+    if(G.venusDeployed){ctx.font="7px sans-serif";ctx.fillStyle="#E8A030";ctx.fillText("♀ Aphrodite Station",Vn.x,Vn.y+Vn.r+19);}
+  }
 
+  // ISRU markers
+  if(G.id_){const lx=M.x-M.r*0.5,ly=M.y+M.r*1.2;ctx.fillStyle="#1D9E75";ctx.fillRect(lx-4,ly-2,9,5);ctx.fillRect(lx-8,ly-1,16,2);ctx.font="7px sans-serif";ctx.textAlign="center";ctx.fillStyle="#0F6E56";ctx.fillText("🇺🇸",lx,ly+10);}
+  if(CN.isruDeployed){const lx=M.x+M.r*0.3,ly=M.y+M.r*1.4;ctx.fillStyle="#D4160A";ctx.fillRect(lx-4,ly-2,9,5);ctx.fillRect(lx-8,ly-1,16,2);ctx.font="7px sans-serif";ctx.textAlign="center";ctx.fillStyle="#7a0c07";ctx.fillText("🇨🇳",lx,ly+10);}
+
+  // Earth
   ctx.fillStyle="#378ADD";ctx.beginPath();ctx.arc(E.x,E.y,E.r,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="rgba(255,255,255,0.2)";ctx.beginPath();ctx.arc(E.x-E.r*.2,E.y-E.r*.25,E.r*.33,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#2C6E4E";ctx.beginPath();ctx.arc(E.x+E.r*.14,E.y+E.r*.07,E.r*.22,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#1D9E75";ctx.beginPath();ctx.arc(E.x-E.r*.08,E.y+E.r*.28,E.r*.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.2)";ctx.beginPath();ctx.arc(E.x-E.r*.2,E.y-E.r*.25,E.r*.3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#2C6E4E";ctx.beginPath();ctx.arc(E.x+E.r*.13,E.y+E.r*.07,E.r*.2,0,Math.PI*2);ctx.fill();
+  // Moon
   ctx.fillStyle="#B4B2A9";ctx.beginPath();ctx.arc(M.x,M.y,M.r,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#888780";ctx.beginPath();ctx.arc(M.x-M.r*.18,M.y-M.r*.14,M.r*.15,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#5F5E5A";ctx.beginPath();ctx.arc(M.x+M.r*.28,M.y+M.r*.22,M.r*.09,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle="#B5D4F4";ctx.beginPath();ctx.arc(M.x-M.r*.05,M.y+M.r*.34,M.r*.12,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#888780";ctx.beginPath();ctx.arc(M.x-M.r*.17,M.y-M.r*.13,M.r*.13,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#B5D4F4";ctx.beginPath();ctx.arc(M.x-M.r*.05,M.y+M.r*.33,M.r*.1,0,Math.PI*2);ctx.fill();
 
   ctx.font="500 9px -apple-system,sans-serif";ctx.textAlign="center";ctx.fillStyle="#73726c";
-  ctx.fillText("EARTH",E.x,E.y+E.r+12);ctx.fillText("MOON",M.x,M.y+M.r+13);
-  ctx.font="9px -apple-system,sans-serif";ctx.fillStyle="rgba(127,119,221,0.4)";ctx.textAlign="left";
-  ctx.fillText("Apr 1 ——— Apr 26",E.x+E.r+6,H-6);
+  ctx.fillText("EARTH",E.x,E.y+E.r+10);ctx.fillText("MOON",M.x,M.y+M.r+11);
+  ctx.font="8px -apple-system,sans-serif";ctx.textAlign="right";
+  ctx.fillStyle="#378ADD";ctx.fillText("▲ Artemis",W-6,13);
+  ctx.fillStyle="#D4160A";ctx.fillText("▲ Chang'e",W-6,23);
+  ctx.fillStyle="rgba(127,119,221,0.35)";ctx.textAlign="left";ctx.fillText("2025–2032",E.x+E.r+4,H-5);
 
+  // Phase labels
   if(phases){
     const ai=phases.findIndex(p=>p.id===activeId);
     phases.forEach((ph,i)=>{
-      const x=ph.lx*W,y=ph.ly*H;
-      const isA=ph.id===activeId,isDone=i<ai;
-      const alpha=isA?1:isDone?0.28:0.16;
-      ctx.save();ctx.globalAlpha=alpha;
-      const dotX=ph.la==="right"?x+6:ph.la==="center"?x:x-6;
-      ctx.fillStyle=ph.c;ctx.beginPath();ctx.arc(dotX,y,isA?4:2.5,0,Math.PI*2);ctx.fill();
-      ctx.font=(isA?"500 ":"")+"10px -apple-system,sans-serif";
-      ctx.fillStyle=isA?"#1a1a18":"#73726c";
-      ctx.textAlign=ph.la==="right"?"right":ph.la==="center"?"center":"left";
+      const x=ph.lx*W,y=ph.ly*H,isA=ph.id===activeId,isDone=i<ai;
+      ctx.save();ctx.globalAlpha=isA?1:isDone?0.25:0.14;
+      const dotX=ph.la==="right"?x+5:ph.la==="center"?x:x-5;
+      ctx.fillStyle=ph.c;ctx.beginPath();ctx.arc(dotX,y,isA?3.5:2,0,Math.PI*2);ctx.fill();
+      ctx.font=(isA?"500 ":"")+"9px -apple-system,sans-serif";
+      ctx.fillStyle=isA?"#1a1a18":"#73726c";ctx.textAlign=ph.la==="right"?"right":ph.la==="center"?"center":"left";
       const tx=ph.la==="right"?x-2:ph.la==="center"?x:x+2;
-      ctx.fillText(ph.n,tx,y+4);
-      if(isA){ctx.font="9px -apple-system,sans-serif";ctx.fillStyle="#73726c";ctx.fillText("Day "+ph.d[0]+"–"+ph.d[1],tx,y+15);}
+      ctx.fillText(ph.n,tx,y+3);
+      if(isA){ctx.font="8px -apple-system,sans-serif";ctx.fillStyle="#73726c";ctx.fillText("D"+ph.d[0]+"–"+ph.d[1],tx,y+13);}
       ctx.restore();
     });
   }
 
+  // China trail (same speed visually — trail length shows relative progress)
+  if(chinaTrail&&chinaTrail.length>1){
+    for(let i=1;i<chinaTrail.length;i++){const al=clamp(i/chinaTrail.length,0,1);ctx.strokeStyle=`rgba(212,22,10,${al*0.48})`;ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(chinaTrail[i-1].x,chinaTrail[i-1].y);ctx.lineTo(chinaTrail[i].x,chinaTrail[i].y);ctx.stroke();}
+  }
+  // Artemis trail
   if(trail.length>1){
     for(let i=1;i<trail.length;i++){
-      const al=clamp(i/trail.length,0,1);
-      const isR=trail[i].ph==="return"||trail[i].ph==="reentry";
+      const al=clamp(i/trail.length,0,1),isR=trail[i].ph==="return"||trail[i].ph==="reentry"||trail[i].ph==="vreturn"||trail[i].ph==="vreentry";
+      const isV=trail[i].ph&&trail[i].ph.startsWith('v');
       const pCol=trail[i].pid?P[trail[i].pid].color:"#378ADD";
-      ctx.strokeStyle=isR?`rgba(127,119,221,${al*.85})`:pCol+Math.round(al*204).toString(16).padStart(2,'0');
-      ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();
+      ctx.strokeStyle=isV?`rgba(200,102,10,${al*0.85})`:isR?`rgba(127,119,221,${al*.8})`:pCol+Math.round(al*196).toString(16).padStart(2,'0');
+      ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();
     }
   }
-
+  // China ship
+  if(CN.active&&chinaShip&&chinaShip.x){ctx.save();ctx.translate(chinaShip.x,chinaShip.y);ctx.fillStyle="#D4160A";ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(3.5,3.5);ctx.lineTo(0,2);ctx.lineTo(-3.5,3.5);ctx.closePath();ctx.fill();ctx.restore();}
+  // Artemis ship
   if(ship&&pid){
+    const isV=G.mt==='venus';
     ctx.save();ctx.translate(ship.x,ship.y);
-    ctx.fillStyle=P[pid].color;
-    ctx.beginPath();ctx.moveTo(0,-7);ctx.lineTo(4,4);ctx.lineTo(0,2);ctx.lineTo(-4,4);ctx.closePath();ctx.fill();
-    ctx.restore();
+    ctx.fillStyle=isV?'#C8660A':P[pid].color;
+    ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(3.5,3.5);ctx.lineTo(0,2);ctx.lineTo(-3.5,3.5);ctx.closePath();ctx.fill();ctx.restore();
   }
 }
 
@@ -502,91 +1201,192 @@ function initChart(){
   if(ch)ch.destroy();
   const dark=matchMedia('(prefers-color-scheme:dark)').matches;
   const tc=dark?"#9c9a92":"#73726c",gc=dark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.05)";
-  ch=new Chart(document.getElementById('chart'),{
-    type:'bar',
-    data:{labels:[],datasets:[
-      {label:'Mission cost',data:[],backgroundColor:"#378ADD",borderRadius:3},
-      {label:'Fuel saving', data:[],backgroundColor:"#1D9E75",borderRadius:3},
-      {label:'Delay cost',  data:[],backgroundColor:"#D85A30",borderRadius:3},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:350},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+rnd(c.parsed.y)+'M'}}},
-      scales:{
-        x:{ticks:{color:tc,font:{size:8}},grid:{color:gc},title:{display:true,text:'Mission #',color:tc,font:{size:8}}},
-        y:{ticks:{color:tc,font:{size:8},callback:v=>'$'+v+'M'},grid:{color:gc},suggestedMin:0}
-      }
-    }
-  });
+  ch=new Chart($('chart'),{type:'bar',data:{labels:[],datasets:[
+    {label:'Cost',data:[],backgroundColor:"#378ADD",borderRadius:3},
+    {label:'Fuel save',data:[],backgroundColor:"#1D9E75",borderRadius:3},
+    {label:'Delay',data:[],backgroundColor:"#D85A30",borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:300},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+rnd(c.parsed.y)+'M'}}},
+    scales:{x:{ticks:{color:tc,font:{size:8}},grid:{color:gc},title:{display:true,text:'Mission',color:tc,font:{size:8}}},
+      y:{ticks:{color:tc,font:{size:8},callback:v=>'$'+v+'M'},grid:{color:gc},suggestedMin:0}}}});
 }
 
-function animate(phases,pid,cost){
-  const ph=phases[G.pi];
-  G.pf=clamp(G.pf,0,1);
-  const W=document.getElementById('traj').offsetWidth||520;
-  const pos=tpt(ph.id,G.pf,W,390);
-  G.trail.push({...pos,ph:ph.id,pid});
-  if(G.trail.length>420)G.trail.shift();
+function launch(mt,pid){
+  G.run=true;G.mt=mt;G.md=0;G.ma=0;G.pi=0;G.pf=0;G.trail=[];G.fired.clear();
+  G.mc++;G.missionInYear++;G.totalMissions++;if(mt==="supply")G.sc++;
+  G.uses[pid]++;G.rel[pid]=Math.min(G.rel[pid]+1,8);G.pid=pid;
+  const p=P[pid],cost=pcost(pid,mt);
+  $('smis').textContent='Y'+G.year+'/M'+G.missionInYear;
+  $('hdr-sub').textContent='Year '+G.year+' · Mission '+G.mc;
+  $('plogo').textContent=p.logo;$('pname').textContent=p.name;
+  $('pstats').textContent=`$${cost}M · ${getCargo()}t · ${getCrew()} crew · Lv${G.rel[pid]}`;
+  $('puses').textContent=G.uses[pid]+'×';
+  $('vehicle-badge').textContent='Vehicle: '+p.logo+' '+p.name;
+  if(G.jaxaPartner)$('jaxa-total').textContent='$'+rnd((G.mc)*15)+'M';
+  // History chip
+  const hist=$('phist');
+  if(hist.querySelector('[style*="color:var(--tx2)"]'))hist.innerHTML='';
+  const chip=document.createElement('span');chip.className='pc';chip.style.background=p.cb;chip.style.color=p.cc;chip.textContent=p.name;
+  hist.appendChild(chip);
+  const phases=moonPhases();buildPList(phases);
+  if(mt==='venus'){$('fuel-title').textContent='Venus & Lunar resources';$('fuel-lbl').textContent='Moon LH2/LOX';$('venus-panel').style.display='block';$('venus-badge').style.display='inline-block';}
+  if(G.esaPartner)$('esa-panel').style.display='block';
+  if(G.jaxaPartner)$('jaxa-panel').style.display='block';
+  animLoop(phases,pid,cost);
+}
+
+function animLoop(phases,pid,cost){
+  const ph=phases[G.pi];G.pf=clamp(G.pf,0,1);
+  const W=$('traj').offsetWidth||480;
+  const pos=tpt(ph.id,G.pf,W,360);
+  G.trail.push({...pos,ph:ph.id,pid});if(G.trail.length>400)G.trail.shift();
   setPhase(ph.id,phases);
+  // Moon fuel production
   if(G.id_&&(ph.id==="surface"||ph.id==="Ice extraction begins")){
     G.fuel=Math.min(120,G.fuel+0.04);
-    document.getElementById('fbar').style.width=clamp(G.fuel/120,0,1)*100+'%';
-    document.getElementById('fpct').textContent=rnd(G.fuel)+'t';
+    $('fbar').style.width=clamp(G.fuel/120,0,1)*100+'%';
+    $('fpct').textContent=rnd(G.fuel)+'t';
+    const d=mfd();$('fsav').textContent=d>0?`Saving $${d}M/mission${G.icePenalty?' (-40%)':''}${G.esaPartner?' (-30% ESA share)':''}`: 'Building stockpile...';
+  }
+  // Venus mining
+  if(G.mt==='venus'&&ph.id==="vmining"){
+    G.venusSO2=Math.min(200,G.venusSO2+0.06);
+    G.venusPhosphine=Math.min(1000,G.venusPhosphine+0.02);
+    $('venus-so2').textContent=rnd(G.venusSO2)+'t';
+    $('venus-phos').textContent=rnd(G.venusPhosphine)+'μg';
+    $('venus-bar').style.width=clamp(G.venusSO2/200,0,1)*100+'%';
   }
   if(G.ff>0)G.ff--;else G.ft=null;
-  draw(pos,G.trail,pid,G.apid,phases);
-  if(Math.random()<0.018)tryRisks(ph.id,pid);
+  advanceChinaFrame(W,360);
+  drawMain(pos,G.trail,pid,G.apid,phases,CN.ship,CN.trail);
+  if(Math.random()<0.016)tryRisks(ph.id,pid);
   G.pf+=ph.s;
   if(G.pf>=1){
     G.pi++;
-    if(G.pi>=phases.length){done(phases,pid,cost);return;}
+    if(G.pi>=phases.length){missionDone(phases,pid,cost);return;}
     G.pf=0;
     if(G.mt==="isru"&&phases[G.pi].id==="surface"){
-      G.id_=true;
-      showOv('success','ISRU deployed! Ice extraction active.');
-      addLog('success','ISRU online — LH2/LOX production begun','Vertical integration: manufacturing propellant on-site.');
-      document.getElementById('fsav').textContent='Producing fuel — discount builds with stockpile';
+      G.id_=true;showOv('success','ISRU deployed!');
+      addLog('success','🇺🇸 ISRU online',G.icePenalty?'China got there first — yield 40% of nominal.':'You deployed ISRU first — full yield secured.');
+      if(!CN.isruDeployed)CN.tension=Math.min(95,CN.tension+20);
+    }
+    if(G.mt==="venus"&&phases[G.pi].id==="vdeploy"){
+      G.venusDeployed=true;showOv('success','Aphrodite Station deployed!');
+      addLog('venus-log','♀ Aphrodite Station operational at 52km','HAVOC platform deployed. SO₂ and phosphine mining begun. Vertical integration: cloud city as supply chain node.');
     }
     tryRisks(phases[G.pi].id,pid);
   }
-  G.af=requestAnimationFrame(()=>animate(phases,pid,cost));
+  G.af=requestAnimationFrame(()=>animLoop(phases,pid,cost));
 }
 
-function done(phases,pid,cost){
+function missionDone(phases,pid,cost){
   G.run=false;
-  const saving=mfd();
-  G.spent+=cost+G.ma;
-  document.getElementById('sspent').textContent='$'+rnd(G.spent)+'M';
-  if(ch){
-    ch.data.labels.push(G.mc);
-    ch.data.datasets[0].data.push(cost);
-    ch.data.datasets[1].data.push(saving);
-    ch.data.datasets[2].data.push(G.ma*3);
-    ch.update();
+  const saving=mfd(),jaxaContrib=G.jaxaPartner&&G.mt==='supply'?15:0;
+  G.spent+=Math.max(0,cost+G.ma-jaxaContrib);
+  missionLog.push({pid,cost,delays:G.md,overrun:G.ma,mt:G.mt,saving,mc:G.mc,yr:G.year});
+  $('sspent').textContent='$'+rnd(G.spent)+'M';
+  if(ch){ch.data.labels.push('Y'+G.year+'M'+G.missionInYear);ch.data.datasets[0].data.push(cost);ch.data.datasets[1].data.push(saving+jaxaContrib);ch.data.datasets[2].data.push(G.ma*3);ch.update();}
+  const score=clamp(100-G.del*3-rnd(G.spent/60)+(G.id_?25:0)+(G.fuel>50?10:0)+(G.esaPartner?10:0)+(G.jaxaPartner?8:0)+(G.venusDeployed?30:0)+(rnd(G.venusSO2/10))-(G.icePenalty?20:0)-(G.sitePenalty?10:0),0,150);
+  G.score=score;
+  const se=$('sscore');se.textContent=score;se.className='sv '+(score>80?'ok':score>50?'warn':'danger');
+  if(G.sc>=3&&!G.iu){G.iu=true;addLog('success','⛏ ISRU mission unlocked',CN.isruDeployed?'China already deployed — race on!':'Beat China to the ice.');}
+  // Year advance
+  if(G.missionInYear>=2){G.year++;G.missionInYear=0;$('hdr-title').textContent='Solar Logistics — Year '+G.year;}
+  // Diplomacy trigger
+  if(G.year===3&&!G.diploDecided){
+    setTimeout(()=>showDiplomacy(),1200);return;
   }
-  const score=clamp(100-G.del*4-rnd(G.spent/50)+(G.id_?20:0),0,100);
-  const se=document.getElementById('sscore');
-  se.textContent=score;se.className='sv '+(score>70?'ok':score>40?'warn':'danger');
-  document.getElementById('bsup').disabled=false;
-  checkISRU();
-  if(G.iu)document.getElementById('bisru').disabled=false;
-  document.getElementById('cprompt').textContent='Mission '+G.mc+' complete! Adjust config or launch next mission.';
-  alert(`Mission ${G.mc} complete with ${P[pid].name}!\n\nCost: $${cost}M  |  Delays: ${G.md}d  |  Overrun: $${G.ma}M\nRelationship: Lv${G.rel[pid]}/8  |  Score: ${score}/100\n\nPartner usage — SpaceX: ×${G.uses.spacex}  Boeing: ×${G.uses.boeing}  Blue Origin: ×${G.uses.blueorigin}\nTotal spent: $${rnd(G.spent)}M`);
+  // Venus unlock
+  if(G.year>=7&&!G.venusUnlocked){G.venusUnlocked=true;addLog('venus-log','♀ Venus HAVOC unlocked — Year 7','Interplanetary logistics: 6-month transit, no surface landing, cloud-city supply chain.');showOv('success','Venus HAVOC mission unlocked!');}
+  // End game
+  if(G.year>8||(G.venusDeployed&&G.venusSO2>100)){setTimeout(()=>showEnd(),1400);return;}
+  $('next-btn').style.display='inline-block';
 }
 
-function checkISRU(){
-  if(G.sc>=3&&!G.iu){
-    G.iu=true;
-    document.getElementById('ilock').style.display='none';
-    document.getElementById('ihint').textContent='ISRU unlocked! Tip: reliability matters more than cost for one-way hardware.';
-    document.getElementById('ihint').style.color='#1D9E75';
-    addLog('success','ISRU unlocked after '+G.sc+' supply missions.','Make-vs-buy decision: build or keep buying fuel from Earth?');
-  }
+function goToNextMission(){
+  $('next-btn').style.display='none';selectedShipId=null;
+  $('cfgscreen').classList.remove('hidden');updateConfigScreen();
 }
 
-initChart();
-onCfg();
-draw(null,[],null,null,PH);
-window.addEventListener('resize',()=>{if(!G.run)draw(null,G.trail,null,G.apid,G.mt==="isru"?IPH:PH);});
+// ===== END SCREEN =====
+function showEnd(){
+  const usa=G.score;
+  const china=CN.score+rnd(CN.fuel*0.5)+(CN.isruDeployed?30:0)+(CN.siteClaimed?15:0);
+  const won=usa>=china;
+  // Score cards
+  const scoreCards=[
+    {flag:'🇺🇸',name:'Artemis',score:usa,color:'var(--blue)',bg:'var(--bg3)',detail:`${G.mc} missions · $${rnd(G.spent)}M · ${rnd(G.fuel)}t fuel · ${rnd(G.venusSO2)}t SO₂`},
+    {flag:'🇨🇳',name:"Chang'e",score:china,color:'var(--china)',bg:'#fff0ef',detail:`${CN.missionCount} missions · Auto · ${rnd(CN.fuel)}t fuel`},
+  ];
+  if(G.esaPartner)scoreCards.push({flag:'🇪🇺',name:'ESA',score:rnd(G.fuel*0.3*0.5)+20,color:'var(--esa)',bg:'#eef0ff',detail:`Coalition partner · 30% fuel rights · Risk-sharing`});
+  if(G.jaxaPartner)scoreCards.push({flag:'🇯🇵',name:'JAXA',score:rnd(G.mc*15*0.3)+15,color:'var(--jaxa)',bg:'#fff0ef',detail:`$${rnd(G.mc*15)}M contributed · Data shared`});
+  $('score-row').innerHTML=scoreCards.map(c=>`<div class="score-card" style="background:${c.bg};border:2px solid ${c.color}"><h3>${c.flag} ${c.name}</h3><div class="big" style="color:${c.color}">${c.score}</div><p>${c.detail}</p></div>`).join('');
+  $('end-title').textContent=won?'🇺🇸 Artemis wins the solar race!':'🇨🇳 Chang\'e claims the Moon first';
+  $('verdict-title').textContent=won?'Mission accomplished':'Lessons learned';
+  let vb=won?'Artemis established the superior logistics position across the solar system. ':'China\'s methodical approach won the race. ';
+  if(G.venusDeployed)vb+=`Aphrodite Station is operational — the first cloud city. SO₂ mining: ${rnd(G.venusSO2)}t. `;
+  if(G.esaPartner&&G.jaxaPartner)vb+='Full coalition assembled: risk-sharing reduced exposure and improved ISRU reliability. ';
+  if(G.icePenalty)vb+='Losing the ISRU race cost 40% fuel yield. ';
+  if(G.sitePenalty)vb+='China\'s site claim added $25M per landing. ';
+  $('verdict-body').textContent=vb;
+  // Financials
+  const totalSave=mfd()*Math.max(1,G.mc);
+  const partnerSave=G.jaxaPartner?G.mc*15:0;
+  $('aar-spend').textContent='$'+rnd(G.spent)+'M';
+  $('aar-partner').textContent=partnerSave>0?'-$'+rnd(partnerSave)+'M':'$0M';
+  $('aar-save').textContent=totalSave>0?'-$'+rnd(totalSave)+'M':'$0M';
+  $('aar-net').textContent='$'+rnd(G.spent-totalSave-partnerSave)+'M';
+  if(missionLog.length>0){
+    const dark=matchMedia('(prefers-color-scheme:dark)').matches;const tc=dark?"#9c9a92":"#73726c",gc=dark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.05)";
+    if(window._ac)window._ac.destroy();
+    window._ac=new Chart($('aar-chart'),{type:'bar',data:{labels:missionLog.map(m=>'Y'+m.yr+'M'+m.mc%2||2),datasets:[
+      {label:'Cost',data:missionLog.map(m=>m.cost),backgroundColor:'#378ADD',borderRadius:3},
+      {label:'Overrun',data:missionLog.map(m=>m.overrun*3),backgroundColor:'#D85A30',borderRadius:3},
+      {label:'Save',data:missionLog.map(m=>-m.saving),backgroundColor:'#1D9E75',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+Math.abs(rnd(c.parsed.y))+'M'}}},
+      scales:{x:{stacked:true,ticks:{color:tc,font:{size:8}},grid:{color:gc}},y:{stacked:true,ticks:{color:tc,font:{size:8},callback:v=>'$'+Math.abs(v)+'M'},grid:{color:gc}}}}});
+  }
+  // Partners
+  const used=Object.keys(G.uses).filter(p=>G.uses[p]>0);
+  $('aar-partners').innerHTML=used.length===0?'<div style="font-size:11px;color:var(--tx2)">No missions.</div>':
+    used.map(pid=>{const p=P[pid],uses=G.uses[pid],rs=G.rel[pid];const ms=missionLog.filter(m=>m.pid===pid);const avg=rnd(ms.reduce((s,m)=>s+m.cost+m.overrun,0)/Math.max(uses,1));const td=ms.reduce((s,m)=>s+m.delays,0);
+    return`<div style="background:var(--bg);border-radius:var(--r8);padding:8px 10px;border-left:3px solid ${p.color};margin-bottom:4px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span style="font-size:14px">${p.logo}</span><div style="flex:1"><div style="font-size:11px;font-weight:500;color:var(--tx)">${p.name}</div><div style="font-size:10px;color:var(--tx2)">${uses}×  · Avg $${avg}M · ${td}d delays</div></div><div style="text-align:right"><div style="font-size:10px;color:var(--tx2)">Relationship</div><div style="font-size:13px;font-weight:500;color:${rs>4?'var(--green)':rs>2?'var(--amber)':'var(--tx)'}">Lv ${rs}/8</div></div></div><div style="height:4px;background:var(--bg2);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.min(rs/8,1)*100}%;background:${p.color};border-radius:2px"></div></div></div>`;
+    }).join('');
+  // Mission log
+  $('aar-log').innerHTML=missionLog.length===0?'<div style="font-size:11px;color:var(--tx2)">No missions.</div>':
+    missionLog.map(m=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--bg);border-radius:var(--r8);font-size:10px;margin-bottom:3px"><span style="font-size:12px">${P[m.pid].logo}</span><span style="font-weight:500;color:var(--tx);min-width:38px">Y${m.yr}M${m.mc}</span><span style="flex:1;color:var(--tx2)">${m.mt==='venus'?'Venus':m.mt==='isru'?'ISRU':'Supply'}·${P[m.pid].name}</span><span style="font-weight:500">$${m.cost}M</span>${m.overrun>0?`<span style="color:var(--red)">+$${m.overrun}M</span>`:''} ${m.delays>0?`<span style="color:var(--amber)">${m.delays}d</span>`:''} ${m.saving>0?`<span style="color:var(--green)">-$${m.saving}M</span>`:''}</div>`).join('');
+  // Competitive
+  const rows=[
+    {l:'Vehicle strategy',v:Object.keys(G.uses).filter(p=>G.uses[p]>0).map(p=>P[p].logo+' '+P[p].name+'×'+G.uses[p]).join(' / ')},
+    {l:'Coalition',v:[G.esaPartner?'🇪🇺 ESA':'',G.jaxaPartner?'🇯🇵 JAXA':''].filter(Boolean).join(' + ')||'Solo'},
+    {l:'ISRU first',v:G.id_&&!G.icePenalty?'🇺🇸 Artemis (+25 pts)':CN.isruDeployed?'🇨🇳 Chang\'e (-20 pts)':'Neither'},
+    {l:'Prime site',v:G.sitePenalty?'🇨🇳 Claimed (-10 pts)':'Open / Artemis'},
+    {l:'Fuel stockpile',v:`USA: ${rnd(G.fuel)}t  China: ${rnd(CN.fuel)}t`},
+    {l:'Venus HAVOC',v:G.venusDeployed?`Deployed — ${rnd(G.venusSO2)}t SO₂, ${rnd(G.venusPhosphine)}μg phosphine (+30 pts)`:'Not reached'},
+    {l:'Total delays',v:G.del+'d (-'+rnd(G.del*3)+' pts)'},
+    {l:'Geopolitical tension at close',v:rnd(CN.tension)+'%'},
+  ];
+  $('end-details').innerHTML=rows.map(r=>`<div class="end-row"><span style="color:var(--tx2)">${r.l}</span><span style="font-weight:500">${r.v}</span></div>`).join('');
+  // Lessons
+  const lessons=[];
+  if(G.uses.boeing>G.uses.spacex)lessons.push('Boeing loyalty: 55% risk modifier cut disruptions nearly in half. High reliability for capital-equipment missions (ISRU, Venus) is worth the cost premium.');
+  if(G.uses.spacex>G.uses.boeing)lessons.push('SpaceX relationship payoff: loyalty discounts and improving reliability illustrate how preferred supplier strategy reduces per-mission cost over time.');
+  if(G.uses.blueorigin>0)lessons.push('Blue Origin new-entrant risk: high early volatility dropped sharply with relationship investment — mirrors how new logistics providers behave in real markets.');
+  if(G.esaPartner&&G.jaxaPartner)lessons.push('Full coalition: risk-sharing across ESA and JAXA reduced exposure on ISRU and supply runs. Horizontal collaboration creates supply chain resilience.');
+  else if(G.esaPartner||G.jaxaPartner)lessons.push('Partial coalition: risk-sharing reduced some exposure. The declined partnership may have further optimized cost or reliability.');
+  if(!G.esaPartner&&!G.jaxaPartner)lessons.push('Solo strategy: no coalition risk-sharing. Higher variance per mission but full control of fuel rights and base naming. Make-vs-buy applied at the geopolitical level.');
+  if(G.id_&&!G.icePenalty)lessons.push('ISRU first-mover: securing ice deposit rights delivered vertical integration payoff. Fixed CapEx amortized across missions makes Moon-fuel cheaper than Earth-fuel by mission 5.');
+  if(G.icePenalty)lessons.push('China\'s ISRU win: second-to-market in vertical integration permanently cost 40% yield. Competitive logistics mirrors real markets — first-mover resource advantages compound.');
+  if(G.venusDeployed)lessons.push('Venus HAVOC: interplanetary logistics require disposable infrastructure, autonomous decision-making (22-min comm delay), and ultra-long supply chains. The cloud city is the ultimate last-mile problem.');
+  if(!G.venusDeployed&&G.year>=7)lessons.push('Venus not reached: the campaign ended before Aphrodite Station could be deployed. In long-horizon logistics, resource depletion at intermediate nodes (Moon) can delay the final destination.');
+  if(G.del>5)lessons.push('High delays: risk management gaps accumulated. Supplier diversification, lower risk settings, and high-reliability partners reduce disruption exposure in long campaigns.');
+  $('aar-lessons').innerHTML=lessons.map((l,i)=>`<div style="margin-bottom:${i<lessons.length-1?6:0}px">• ${l}</div>`).join('');
+  $('endscreen').classList.add('show');
+}
+
+// ===== INIT =====
+drawIntroCanvas();
 </script>
 </body>
 </html>
